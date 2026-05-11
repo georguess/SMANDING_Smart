@@ -12,6 +12,8 @@ use App\Http\Controllers\Api\AttendanceController;
 
 // Endpoint untuk Mesin (Hardware IoT) RFID
 Route::post('/attendance/tap', [AttendanceController::class, 'tap']);
+Route::get('/attendance/latest', [AttendanceController::class, 'latest'])
+    ->name('api.attendance.latest');
 
 // Route bawaan Laravel Sanctum
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

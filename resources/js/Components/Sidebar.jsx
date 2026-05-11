@@ -8,12 +8,10 @@ export default function Sidebar() {
         { name: "Data Siswa", href: "/siswa" },
         { name: "Data Guru", href: "/guru" },
         { name: "Data Kelas", href: "/kelas" },
-        { name: "Jadwal", href: "/jadwal" },
-        { name: "Laporan", href: "/laporan" },
-    ];
+    ]
 
     return (
-        <aside className="w-72 min-h-screen bg-[#612D53] text-white hidden lg:flex flex-col shadow-2xl">
+        <div className="w-72 min-h-screen bg-[#612D53] text-white hidden lg:flex flex-col shadow-2xl">
             {/* Brand */}
             <div className="px-6 py-7 border-b border-white/10">
                 <h1 className="text-2xl font-bold tracking-wide">SMANDING Smart</h1>
@@ -51,8 +49,17 @@ export default function Sidebar() {
                                     }`}
                                 />
                             </Link>
+                            
+                            
                         );
                     })}
+                    <Link
+                        href="/logout"
+                        method="post"
+                        as="button"
+                        className="px-5 py-2 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition">
+                        Logout
+                    </Link>
                 </nav>
             </div>
 
@@ -65,6 +72,6 @@ export default function Sidebar() {
                     </p>
                 </div>
             </div>
-        </aside>
+        </div>
     );
 }

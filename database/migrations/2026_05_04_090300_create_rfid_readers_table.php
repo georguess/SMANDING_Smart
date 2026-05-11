@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('rfid_readers', function (Blueprint $table) {
             $table->id();
             $table->string('lokasi');
+            $table->enum('status',['active','inactive','maintenance']);
             $table->timestamps();
         });
     }

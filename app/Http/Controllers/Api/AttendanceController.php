@@ -3,73 +3,156 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\RfidCard;
 use App\Models\Attendance;
-use Carbon\Carbon;
+use App\Models\RfidCard;
+use App\Models\RfidReader;
+use App\Models\Semester;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class AttendanceController extends Controller
 {
-    /**
-     * Endpoint untuk menerima ketukan (tap) dari mesin RFID (ESP32/NodeMCU)
-     */
     public function tap(Request $request)
     {
-        // 1. Validasi input dari mesin (harus ada UID Kartu dan ID Mesin Pembaca)
-        $request->validate([
-            'uid_card' => 'required|string',
-            'rfid_reader_id' => 'required|exists:rfid_readers,id',
+        $validated = $request->validate([
+            'uid_card' => ['required', 'string', 'max:100'],
+            'rfid_reader_id' => ['nullable', 'exists:rfid_readers,id'],
+            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:4096'],
         ]);
 
-        // 2. Cari kartu di database dan ambil data siswa/user yang memilikinya
-        $card = RfidCard::with('siswa')->where('uid_card', $request->uid_card)->first();
+        $rfidCard = RfidCard::with(['siswa.kelas'])
+            ->where('uid_card', $validated['uid_card'])
+            ->where('status', 'active')
+            ->first();
 
-        if (!$card) {
+        if (!$rfidCard) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Kartu tidak terdaftar di sistem!'
+                'success' => false,
+                'message' => 'Kartu RFID tidak terdaftar atau tidak aktif.',
             ], 404);
         }
 
-        $userId = $card->siswa->user_id;
-        $today = Carbon::today();
+        $siswa = $rfidCard->siswa;
 
-        // 3. Cek apakah siswa ini sudah absen hari ini
-        $alreadyTapped = Attendance::where('user_id', $userId)
-            ->whereDate('waktu', $today)
-            ->first();
-
-        if ($alreadyTapped) {
+        if (!$siswa) {
             return response()->json([
-                'status' => 'warning',
-                'message' => 'Siswa sudah melakukan presensi hari ini.',
-                'data' => [
-                    'nama' => $card->siswa->nama,
-                    'waktu' => $alreadyTapped->waktu->format('H:i:s')
-                ]
-            ], 400);
+                'success' => false,
+                'message' => 'Kartu RFID tidak terhubung dengan siswa.',
+            ], 404);
         }
 
-        // 4. Rekam presensi ke database (Asumsi jam masuk sebelum jam 7 = Hadir)
-        // Di sistem yang lebih kompleks, ini bisa dicek apakah terlambat atau tidak
+        if (!$siswa->kelas_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Siswa belum memiliki kelas.',
+            ], 422);
+        }
+
+        $reader = null;
+
+        if (!empty($validated['rfid_reader_id'])) {
+            $reader = RfidReader::find($validated['rfid_reader_id']);
+
+            if ($reader && $reader->status !== 'active') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'RFID Reader sedang tidak aktif.',
+                ], 422);
+            }
+        }
+
+        $semester = Semester::orderByDesc('id')->first();
+
+        $fotoPath = null;
+
+        if ($request->hasFile('foto')) {
+            $fotoPath = $request->file('foto')->store('attendance-photos', 'public');
+        }
+
+        $today = now()->toDateString();
+
+        $existingAttendance = Attendance::where('siswa_id', $siswa->id)
+            ->whereDate('waktu_absen', $today)
+            ->first();
+
+        if ($existingAttendance) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Siswa sudah melakukan absensi hari ini.',
+                'status' => 'already_checked_in',
+                'data' => [
+                    'id' => $existingAttendance->id,
+                    'nama' => $siswa->nama,
+                    'nis' => $siswa->nis,
+                    'kelas' => $siswa->kelas?->nama_kelas,
+                    'waktu_absen' => $existingAttendance->waktu_absen,
+                    'status_absensi' => $existingAttendance->status,
+                    'foto' => $existingAttendance->foto
+                        ? asset('storage/' . $existingAttendance->foto)
+                        : null,
+                ],
+            ]);
+        }
+
         $attendance = Attendance::create([
-            'user_id' => $userId,
-            'rfid_card_id' => $card->id,
-            'rfid_reader_id' => $request->rfid_reader_id,
-            'guru_id' => null, // Karena dari mesin otomatis, tanpa pengawas spesifik
-            'waktu' => now(),
-            'status' => 'hadir' // Otomatis hadir karena nge-tap
+            'user_id' => $siswa->user_id,
+            'siswa_id' => $siswa->id,
+            'kelas_id' => $siswa->kelas_id,
+            'semester_id' => $semester?->id,
+            'rfid_reader_id' => $validated['rfid_reader_id'] ?? null,
+            'waktu_absen' => now(),
+            'status' => 'hadir',
+            'foto' => $fotoPath,
         ]);
 
-        // 5. Kembalikan balasan sukses ke mesin RFID (Mesin bisa membunyikan buzzer "Bip Bip")
+        $attendance->load(['siswa.kelas', 'rfidReader', 'semester']);
+
         return response()->json([
-            'status' => 'success',
-            'message' => 'Presensi berhasil direkam!',
+            'success' => true,
+            'message' => 'Absensi berhasil disimpan.',
+            'status' => 'checked_in',
             'data' => [
-                'nama' => $card->siswa->nama,
-                'status' => $attendance->status,
-                'waktu' => $attendance->waktu->format('H:i:s')
-            ]
+                'id' => $attendance->id,
+                'nama' => $attendance->siswa?->nama,
+                'nis' => $attendance->siswa?->nis,
+                'kelas' => $attendance->kelas?->nama_kelas,
+                'reader' => $attendance->rfidReader?->lokasi,
+                'semester' => $attendance->semester?->nama ?? $attendance->semester?->name,
+                'waktu_absen' => $attendance->waktu_absen,
+                'status_absensi' => $attendance->status,
+                'foto' => $attendance->foto
+                    ? asset('storage/' . $attendance->foto)
+                    : null,
+            ],
         ], 201);
+    }
+
+    public function latest()
+    {
+        $attendances = Attendance::with(['siswa.kelas', 'rfidReader'])
+            ->orderByDesc('waktu_absen')
+            ->limit(30)
+            ->get()
+            ->map(function ($attendance) {
+                return [
+                    'id' => $attendance->id,
+                    'nama' => $attendance->siswa?->nama,
+                    'nis' => $attendance->siswa?->nis,
+                    'kelas' => $attendance->siswa?->kelas?->nama_kelas,
+                    'reader' => $attendance->rfidReader?->lokasi,
+                    'waktu_absen' => $attendance->waktu_absen,
+                    'status' => $attendance->status,
+                    'foto' => $attendance->foto
+                        ? asset('storage/' . $attendance->foto)
+                        : null,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data absensi terbaru berhasil diambil.',
+            'data' => $attendances,
+        ]);
     }
 }

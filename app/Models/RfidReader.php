@@ -8,4 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class RfidReader extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'lokasi',
+        'status',
+    ];
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
 }

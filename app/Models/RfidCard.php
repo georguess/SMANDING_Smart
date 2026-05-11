@@ -11,8 +11,14 @@ class RfidCard extends Model
 
     protected $guarded = ['id'];
 
+    protected $fillable = [
+        'siswa_id',
+        'uid_card',
+        'status',
+    ];
+
     public function siswa()
     {
-        return $this->belongsTo(Siswa::class);
+        return $this->belongsTo(Siswa::class, 'siswa_id');
     }
 }
