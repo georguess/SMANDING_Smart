@@ -24,7 +24,7 @@ return new class extends Migration
             $table->foreignId('semester_id')->nullable()->constrained('semesters')->onDelete('set null');
             $table->foreignId('siswa_id')->nullable()->constrained('siswas')->onDelete('set null');
             $table->dateTime('waktu_absen');
-            $table->enum('status', ['hadir', 'sakit', 'izin', 'alpa']);
+            $table->enum('status', ['hadir', 'sakit', 'izin', 'alfa']);
             $table->string('foto')->nullable();
             $table->timestamps();
             
