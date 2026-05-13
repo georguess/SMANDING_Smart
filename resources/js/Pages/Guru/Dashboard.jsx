@@ -19,7 +19,7 @@ export default function Dashboard({
         {
             label: "Total Siswa",
             value: summary.total_siswa ?? 0,
-            icon: "👨‍🎓",
+            icon: "👥",
             description: "Siswa dalam kelas wali",
             iconBox: "bg-blue-100 text-blue-700",
             bubble: "bg-blue-50",
@@ -28,7 +28,7 @@ export default function Dashboard({
         {
             label: "Absensi Hari Ini",
             value: summary.absensi_hari_ini ?? 0,
-            icon: "📋",
+            icon: "📝",
             description: "Data absensi hari ini",
             iconBox: "bg-emerald-100 text-emerald-700",
             bubble: "bg-emerald-50",
@@ -37,7 +37,7 @@ export default function Dashboard({
         {
             label: "Persentase Hadir",
             value: `${summary.persentase_hadir ?? 0}%`,
-            icon: "📈",
+            icon: "📊",
             description: "Tingkat kehadiran harian",
             iconBox: "bg-amber-100 text-amber-700",
             bubble: "bg-amber-50",
@@ -88,36 +88,34 @@ export default function Dashboard({
             alfa: "bg-red-100 text-red-700",
         };
 
-        return styles[status] ?? "bg-slate-100 text-slate-700";
+        return styles[String(status).toLowerCase()] ?? "bg-slate-100 text-slate-700";
     };
 
     return (
         <GuruLayout title="Dashboard Guru">
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
                 {/* Header */}
-                <div className="rounded-3xl bg-gradient-to-r from-cyan-700 via-cyan-600 to-cyan-800 p-7 text-white shadow-lg">
+                <div className="rounded-2xl bg-gradient-to-r from-cyan-700 via-cyan-600 to-cyan-800 p-5 text-white shadow-lg sm:rounded-3xl sm:p-7">
                     <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
-                        <div>
-                            <p className="mb-3 text-sm font-black uppercase tracking-[0.35em] text-cyan-100">
+                        <div className="min-w-0">
+                            <p className="mb-3 text-xs font-black uppercase tracking-[0.25em] text-cyan-100 sm:text-sm sm:tracking-[0.35em]">
                                 Panel Wali Kelas
                             </p>
-
-                            <h1 className="text-3xl font-black">
+                            <h1 className="text-2xl font-black sm:text-3xl">
                                 Dashboard Guru
                             </h1>
-
-                            <p className="mt-3 max-w-2xl leading-relaxed text-cyan-50">
+                            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-cyan-50 sm:text-base">
                                 Ringkasan absensi khusus kelas yang diwalikan,
-                                termasuk data siswa, kehadiran harian, dan
-                                riwayat absensi terbaru.
+                                termasuk data siswa, kehadiran harian, dan riwayat
+                                absensi terbaru.
                             </p>
                         </div>
 
-                        <div className="rounded-3xl bg-white/15 px-7 py-5 text-center backdrop-blur">
+                        <div className="w-full rounded-2xl bg-white/15 px-5 py-4 text-center backdrop-blur sm:w-auto sm:rounded-3xl sm:px-7 sm:py-5">
                             <p className="text-sm font-semibold text-cyan-50">
                                 Kelas Wali
                             </p>
-                            <p className="mt-1 text-4xl font-black">
+                            <p className="mt-1 text-3xl font-black sm:text-4xl">
                                 {summary.total_kelas ?? 0}
                             </p>
                         </div>
@@ -125,39 +123,34 @@ export default function Dashboard({
                 </div>
 
                 {/* Statistik Utama */}
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
                     {mainCards.map((card) => (
                         <div
                             key={card.label}
-                            className="relative overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
+                            className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg sm:rounded-3xl sm:p-6"
                         >
                             <div
-                                className={`absolute -right-8 -top-8 h-28 w-28 rounded-full ${card.bubble}`}
+                                className={`absolute -right-8 -top-8 h-24 w-24 rounded-full sm:h-28 sm:w-28 ${card.bubble}`}
                             />
-
                             <div className="relative">
-                                <div className="mb-6 flex items-start justify-between">
+                                <div className="mb-5 flex items-start justify-between gap-3 sm:mb-6">
                                     <div
-                                        className={`flex h-14 w-14 items-center justify-center rounded-2xl text-2xl ${card.iconBox}`}
+                                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-xl sm:h-14 sm:w-14 sm:text-2xl ${card.iconBox}`}
                                     >
                                         {card.icon}
                                     </div>
-
                                     <span className="rounded-full bg-slate-50 px-3 py-1 text-xs font-bold text-slate-500">
                                         Ringkasan
                                     </span>
                                 </div>
-
                                 <p className="text-sm font-bold text-slate-500">
                                     {card.label}
                                 </p>
-
                                 <h2
-                                    className={`mt-2 text-4xl font-black ${card.valueColor}`}
+                                    className={`mt-2 text-3xl font-black sm:text-4xl ${card.valueColor}`}
                                 >
                                     {card.value}
                                 </h2>
-
                                 <p className="mt-2 text-sm font-medium text-slate-500">
                                     {card.description}
                                 </p>
@@ -167,27 +160,25 @@ export default function Dashboard({
                 </div>
 
                 {/* Statistik Status */}
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-4">
+                <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-5">
                     {statusCards.map((card) => (
                         <div
                             key={card.label}
-                            className={`rounded-3xl p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg ${card.bg}`}
+                            className={`rounded-2xl p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg sm:rounded-3xl sm:p-6 ${card.bg}`}
                         >
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between gap-3">
                                 <div>
                                     <p className="text-sm font-bold text-slate-500">
                                         {card.label}
                                     </p>
-
                                     <h2
-                                        className={`mt-2 text-3xl font-black ${card.color}`}
+                                        className={`mt-2 text-2xl font-black sm:text-3xl ${card.color}`}
                                     >
                                         {card.value}
                                     </h2>
                                 </div>
-
                                 <div
-                                    className={`flex h-14 w-14 items-center justify-center rounded-2xl text-xl font-black ${card.iconBg} ${card.color}`}
+                                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-base font-black sm:h-14 sm:w-14 sm:text-xl ${card.iconBg} ${card.color}`}
                                 >
                                     {card.icon}
                                 </div>
@@ -197,18 +188,17 @@ export default function Dashboard({
                 </div>
 
                 {/* Kelas Wali */}
-                <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
-                    <div className="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-center">
+                <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6">
+                    <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                         <div>
-                            <h2 className="text-xl font-black text-slate-800">
+                            <h2 className="text-lg font-black text-slate-800 sm:text-xl">
                                 Kelas yang Diwalikan
                             </h2>
                             <p className="text-sm text-slate-500">
                                 Daftar kelas yang menjadi tanggung jawab guru.
                             </p>
                         </div>
-
-                        <div className="rounded-2xl bg-cyan-100 px-4 py-2 text-sm font-black text-cyan-700">
+                        <div className="w-fit rounded-2xl bg-cyan-100 px-4 py-2 text-sm font-black text-cyan-700">
                             {kelasWali.length} kelas
                         </div>
                     </div>
@@ -218,18 +208,16 @@ export default function Dashboard({
                             kelasWali.map((kelas) => (
                                 <div
                                     key={kelas.id}
-                                    className="flex flex-col justify-between gap-4 rounded-2xl border border-cyan-100 bg-gradient-to-r from-cyan-50 to-white p-5 md:flex-row md:items-center"
+                                    className="flex flex-col justify-between gap-4 rounded-2xl border border-cyan-100 bg-gradient-to-r from-cyan-50 to-white p-4 sm:p-5 md:flex-row md:items-center"
                                 >
-                                    <div>
-                                        <h3 className="text-lg font-black text-slate-800">
+                                    <div className="min-w-0">
+                                        <h3 className="truncate text-lg font-black text-slate-800">
                                             {kelas.nama_kelas}
                                         </h3>
                                         <p className="text-sm font-medium text-slate-500">
-                                            Tahun Ajaran:{" "}
-                                            {kelas.tahun_ajaran ?? "-"}
+                                            Tahun Ajaran: {kelas.tahun_ajaran ?? "-"}
                                         </p>
                                     </div>
-
                                     <span className="w-fit rounded-2xl bg-cyan-700 px-4 py-2 text-sm font-black text-white">
                                         {kelas.jumlah_siswa ?? 0} siswa
                                     </span>
@@ -244,19 +232,57 @@ export default function Dashboard({
                 </div>
 
                 {/* Ringkasan 7 Hari */}
-                <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
+                <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6">
                     <div className="mb-5">
-                        <h2 className="text-xl font-black text-slate-800">
+                        <h2 className="text-lg font-black text-slate-800 sm:text-xl">
                             Ringkasan 7 Hari Terakhir
                         </h2>
                         <p className="text-sm text-slate-500">
-                            Rekap jumlah hadir, izin, sakit, dan alfa selama
-                            satu minggu terakhir.
+                            Rekap jumlah hadir, izin, sakit, dan alfa selama satu
+                            minggu terakhir.
                         </p>
                     </div>
 
-                    <div className="overflow-x-auto rounded-2xl border border-slate-100">
-                        <table className="w-full border-collapse text-left text-sm">
+                    <div className="space-y-3 md:hidden">
+                        {weeklyAttendance.length > 0 ? (
+                            weeklyAttendance.map((item) => (
+                                <div
+                                    key={item.tanggal}
+                                    className="rounded-2xl border border-slate-100 bg-slate-50 p-4"
+                                >
+                                    <div className="mb-3 flex items-center justify-between gap-3">
+                                        <p className="font-black text-slate-800">
+                                            {item.label}
+                                        </p>
+                                        <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-600">
+                                            Total {item.total}
+                                        </span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2 text-sm">
+                                        <p className="rounded-xl bg-white px-3 py-2 font-bold text-emerald-600">
+                                            Hadir: {item.hadir}
+                                        </p>
+                                        <p className="rounded-xl bg-white px-3 py-2 font-bold text-blue-600">
+                                            Izin: {item.izin}
+                                        </p>
+                                        <p className="rounded-xl bg-white px-3 py-2 font-bold text-amber-600">
+                                            Sakit: {item.sakit}
+                                        </p>
+                                        <p className="rounded-xl bg-white px-3 py-2 font-bold text-red-600">
+                                            Alfa: {item.alfa}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="rounded-2xl bg-slate-50 p-5 text-center text-slate-500">
+                                Belum ada data mingguan.
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="hidden overflow-x-auto rounded-2xl border border-slate-100 md:block">
+                        <table className="min-w-[720px] w-full border-collapse text-left text-sm">
                             <thead>
                                 <tr className="bg-cyan-700 text-white">
                                     <th className="p-4">Tanggal</th>
@@ -267,7 +293,6 @@ export default function Dashboard({
                                     <th className="p-4">Total</th>
                                 </tr>
                             </thead>
-
                             <tbody>
                                 {weeklyAttendance.length > 0 ? (
                                     weeklyAttendance.map((item) => (
@@ -278,23 +303,18 @@ export default function Dashboard({
                                             <td className="p-4 font-semibold text-slate-700">
                                                 {item.label}
                                             </td>
-
                                             <td className="p-4 font-bold text-emerald-600">
                                                 {item.hadir}
                                             </td>
-
                                             <td className="p-4 font-bold text-blue-600">
                                                 {item.izin}
                                             </td>
-
                                             <td className="p-4 font-bold text-amber-600">
                                                 {item.sakit}
                                             </td>
-
                                             <td className="p-4 font-bold text-red-600">
                                                 {item.alfa}
                                             </td>
-
                                             <td className="p-4 font-black text-slate-800">
                                                 {item.total}
                                             </td>
@@ -316,9 +336,9 @@ export default function Dashboard({
                 </div>
 
                 {/* Absensi Terakhir */}
-                <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
+                <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6">
                     <div className="mb-5">
-                        <h2 className="text-xl font-black text-slate-800">
+                        <h2 className="text-lg font-black text-slate-800 sm:text-xl">
                             30 Absensi Terakhir
                         </h2>
                         <p className="text-sm text-slate-500">
@@ -326,8 +346,44 @@ export default function Dashboard({
                         </p>
                     </div>
 
-                    <div className="overflow-x-auto rounded-2xl border border-slate-100">
-                        <table className="w-full border-collapse text-left text-sm">
+                    <div className="space-y-3 md:hidden">
+                        {latestAttendances.length > 0 ? (
+                            latestAttendances.map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="rounded-2xl border border-slate-100 bg-slate-50 p-4"
+                                >
+                                    <div className="mb-3 flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <p className="truncate font-black text-slate-800">
+                                                {item.nama_siswa}
+                                            </p>
+                                            <p className="text-sm text-slate-500">
+                                                {item.kelas}
+                                            </p>
+                                        </div>
+                                        <span
+                                            className={`shrink-0 rounded-full px-3 py-1 text-xs font-black capitalize ${getStatusBadge(
+                                                item.status
+                                            )}`}
+                                        >
+                                            {item.status}
+                                        </span>
+                                    </div>
+                                    <p className="text-sm text-slate-600">
+                                        {item.waktu_absen}
+                                    </p>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="rounded-2xl bg-slate-50 p-5 text-center text-slate-500">
+                                Belum ada data absensi.
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="hidden overflow-x-auto rounded-2xl border border-slate-100 md:block">
+                        <table className="min-w-[700px] w-full border-collapse text-left text-sm">
                             <thead>
                                 <tr className="bg-cyan-700 text-white">
                                     <th className="p-4">Nama Siswa</th>
@@ -336,7 +392,6 @@ export default function Dashboard({
                                     <th className="p-4">Waktu</th>
                                 </tr>
                             </thead>
-
                             <tbody>
                                 {latestAttendances.length > 0 ? (
                                     latestAttendances.map((item) => (
@@ -347,11 +402,9 @@ export default function Dashboard({
                                             <td className="p-4 font-bold text-slate-800">
                                                 {item.nama_siswa}
                                             </td>
-
                                             <td className="p-4 text-slate-600">
                                                 {item.kelas}
                                             </td>
-
                                             <td className="p-4 capitalize">
                                                 <span
                                                     className={`rounded-full px-3 py-1 text-xs font-black ${getStatusBadge(
@@ -361,7 +414,6 @@ export default function Dashboard({
                                                     {item.status}
                                                 </span>
                                             </td>
-
                                             <td className="p-4 text-slate-600">
                                                 {item.waktu_absen}
                                             </td>
