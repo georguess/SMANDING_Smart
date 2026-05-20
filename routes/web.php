@@ -14,6 +14,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\RfidReaderController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LiveAttendanceController;
+use App\Http\Controllers\Siswa\DashboardController as SiswaDashboardController;
+use App\Http\Controllers\Siswa\SettingController as SiswaSettingController;
 use Illuminate\Foundation\Application;
 use Inertia\Inertia;
 
@@ -72,9 +74,11 @@ Route::middleware(['auth', 'role:siswa'])
     ->prefix('siswa')
     ->name('siswa.')
     ->group(function () {
-        Route::get('/dashboard', function () {
-            return Inertia::render('Siswa/Dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [SiswaDashboardController::class, 'index'])->name('dashboard');
+        
+        Route::get('/settings', [SiswaSettingController::class, 'edit'])->name('settings.edit');
+        Route::post('/settings/profile', [SiswaSettingController::class, 'updateProfile'])->name('settings.profile');
+        Route::patch('/settings/password', [SiswaSettingController::class, 'updatePassword'])->name('settings.password');
     });
 
 

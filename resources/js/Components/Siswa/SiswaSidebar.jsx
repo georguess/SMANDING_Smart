@@ -1,22 +1,15 @@
 import React from "react";
 import { Link, router, usePage } from "@inertiajs/react";
-import { LayoutDashboard, Users, FileText, Settings, LogOut, FileBadge, Contact, BookOpen, Fingerprint, CreditCard } from "lucide-react";
+import { LayoutDashboard, Settings, LogOut } from "lucide-react";
 
-export default function AdminSidebar() {
+export default function SiswaSidebar() {
     const currentPath = window.location.pathname;
     const { auth } = usePage().props;
-    const user = auth?.user || { username: "admin", role: "admin" };
+    const user = auth?.user || { username: "siswa", role: "siswa" };
 
     const menus = [
-        { label: "Dashboard", href: "/admin/dashboard", icon: <LayoutDashboard size={20} /> },
-        { label: "Data Siswa", href: "/admin/students", icon: <Contact size={20} /> },
-        { label: "Data Guru", href: "/admin/teachers", icon: <Users size={20} /> },
-        { label: "Data Kelas", href: "/admin/classes", icon: <BookOpen size={20} /> },
-        { label: "Data Admin", href: "/admin/admins", icon: <FileBadge size={20} /> },
-        { label: "Semester", href: "/admin/semesters", icon: <FileText size={20} /> },
-        { label: "RFID Reader", href: "/admin/rfid-readers", icon: <Fingerprint size={20} /> },
-        { label: "RFID Card", href: "/admin/rfid-cards", icon: <CreditCard size={20} /> },
-        { label: "Kelola Absensi", href: "/admin/attendances", icon: <FileText size={20} /> },
+        { label: "Dashboard", href: "/siswa/dashboard", icon: <LayoutDashboard size={20} /> },
+        { label: "Settings", href: "/siswa/settings", icon: <Settings size={20} /> },
     ];
 
     const isActive = (href) => {
@@ -46,7 +39,7 @@ export default function AdminSidebar() {
                             SMANDING
                         </h1>
                         <p className="text-sm font-semibold text-white/90">
-                            Panel Admin
+                            Panel Siswa
                         </p>
                     </div>
                 </div>
@@ -70,7 +63,7 @@ export default function AdminSidebar() {
                         >
                             <div className="flex items-center gap-4">
                                 {menu.icon}
-                                <span>{menu.label}</span>
+                                <span className={isActive(menu.href) ? "" : ""}>{menu.label}</span>
                             </div>
 
                             {isActive(menu.href) && (
@@ -85,14 +78,14 @@ export default function AdminSidebar() {
                 <div className="flex items-center justify-between rounded-2xl bg-[#095E6F] p-2 shadow-inner">
                     <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg font-bold text-[#0C7489]">
-                            {user.username ? user.username.charAt(0).toUpperCase() : "A"}
+                            {user.username ? user.username.charAt(0).toUpperCase() : "S"}
                         </div>
                         <div>
                             <p className="text-sm font-extrabold text-white">
-                                {user.username || "Admin"}
+                                {user.username || "Siswa"}
                             </p>
                             <p className="text-xs font-semibold tracking-wide text-white/70 capitalize">
-                                {user.role || "Admin"}
+                                {user.role || "Siswa"}
                             </p>
                         </div>
                     </div>

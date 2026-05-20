@@ -20,6 +20,8 @@
         "vite": "^5.0.0"
     },
     "dependencies": {
+        "lucide-react": "^1.16.0",
+        "react-hot-toast": "^2.6.0",
         "recharts": "^3.8.1"
     }
 }
