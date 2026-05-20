@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Admin;
 use App\Models\Guru;
 use App\Models\Siswa;
+use App\Models\Kelas;
 use App\Models\RfidReader;
 use App\Models\RfidCard;
 use App\Models\Attendance;
@@ -51,12 +52,19 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password123'),
             'role' => 'siswa'
         ]);
+
+        $kelas = Kelas::create([
+            'nama_kelas' => 'XII 7',
+            'guru_id' => $guru->id,
+            'tahun_ajaran' => '2025/2026',
+        ]);
+
         $siswa = Siswa::create([
             'user_id' => $userSiswa->id,
             'nama' => 'Andi Darmawan',
+            'nis' => '1123',
             'nisn' => '0051234567',
-            'kelas' => 'XII',
-            'jurusan' => 'RPL'
+            'kelas_id' => $kelas->id,
         ]);
 
         // 4. Buat Data Mesin RFID Reader
@@ -73,10 +81,12 @@ class DatabaseSeeder extends Seeder
         // 6. Buat Data Simulasi Kehadiran (Presensi)
         Attendance::create([
             'user_id' => $userSiswa->id, // User yang absen (Andi)
+            'siswa_id' => $siswa->id,
+            'kelas_id' => $kelas->id,
             'rfid_card_id' => $card->id, // Memakai kartu A1B...
             'rfid_reader_id' => $reader->id, // Di Gerbang Utama
             'guru_id' => $guru->id, // Diawasi oleh Pak Budi
-            'waktu' => now()->subHours(2), // Absen 2 jam yang lalu
+            'waktu_absen' => now()->subHours(2), // Absen 2 jam yang lalu
             'status' => 'hadir'
         ]);
     }

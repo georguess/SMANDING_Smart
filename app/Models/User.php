@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -18,9 +19,13 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'username',
         'email',
         'password',
+        'role',
+        'birth_date',
+        'photo_profile',
+        'is_active',
     ];
 
     /**
@@ -40,6 +45,23 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'birth_date' =>'date',
         'password' => 'hashed',
+        'is_active' => 'boolean',
     ];
+
+    public function siswa(){
+        return $this->hasOne(Siswa::class);
+    }
+
+    public function guru(){
+        return $this->hasOne(Guru::class);
+    }
+
+    public function rfid_cards(){
+        return $this->hasMany(RfidCard::class);
+    }
+    public function attendance(){
+        return $this->hasMany(Attendance::class);
+    }
 }

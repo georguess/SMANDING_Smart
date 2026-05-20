@@ -51,8 +51,17 @@ export default function Sidebar() {
                                     }`}
                                 />
                             </Link>
+                            
+                            
                         );
                     })}
+                    <Link
+                        href="/logout"
+                        method="post"
+                        as="button"
+                        className="px-5 py-2 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition">
+                        Logout
+                    </Link>
                 </nav>
             </div>
 
