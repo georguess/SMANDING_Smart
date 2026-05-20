@@ -9,10 +9,38 @@ class Siswa extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'user_id',
+        'kelas_id',
+        'nama',
+        'nis',
+        'nisn',
+        'alamat',
+    ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function kelas()
+    {
+        return $this->belongsTo(Kelas::class, 'kelas_id');
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'siswa_id');
+    }
+
+    public function rfidCards()
+    {
+        return $this->hasMany(RfidCard::class, 'siswa_id');
+    }
+
+    public function activeRfidCard()
+    {
+        return $this->hasOne(RfidCard::class, 'siswa_id')
+            ->where('status', 'active');
     }
 }
