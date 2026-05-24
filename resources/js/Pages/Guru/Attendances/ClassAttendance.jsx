@@ -86,16 +86,49 @@ export default function ClassAttendance({
         });
     };
 
-    const getStatusBadge = (itemStatus) => {
-        const styles = {
-            hadir: "bg-emerald-100 text-emerald-700",
-            izin: "bg-blue-100 text-blue-700",
-            sakit: "bg-amber-100 text-amber-700",
-            alfa: "bg-red-100 text-red-700",
-        };
+    const isTerlambat = (item) => {
+    if (!item?.waktu_absen) return false;
 
-        return styles[String(itemStatus).toLowerCase()] ?? "bg-slate-100 text-slate-700";
+    if (String(item.status).toLowerCase() !== "hadir") return false;
+
+    const waktu = new Date(item.waktu_absen);
+
+    const jamMasuk = 7;
+    const menitMasuk = 0;
+
+    return (
+        waktu.getHours() > jamMasuk ||
+        (waktu.getHours() === jamMasuk && waktu.getMinutes() > menitMasuk)
+    );
+};
+
+const getStatusLabel = (item) => {
+    const itemStatus = String(item.status).toLowerCase();
+
+    if (itemStatus === "hadir" && isTerlambat(item)) {
+        return "Hadir Terlambat";
+    }
+
+    return itemStatus.charAt(0).toUpperCase() + itemStatus.slice(1);
+};
+
+const getStatusBadge = (item) => {
+    const itemStatus = String(item.status).toLowerCase();
+
+    if (itemStatus === "hadir" && isTerlambat(item)) {
+        return "bg-orange-100 text-orange-700";
+    }
+
+    const styles = {
+        hadir: "bg-emerald-100 text-emerald-700",
+        izin: "bg-blue-100 text-blue-700",
+        sakit: "bg-amber-100 text-amber-700",
+        alfa: "bg-red-100 text-red-700",
     };
+
+    return styles[itemStatus] ?? "bg-slate-100 text-slate-700";
+};
+
 
     const statusSummaryCards = [
         {
@@ -292,8 +325,8 @@ export default function ClassAttendance({
                                             {formatTanggal(item.waktu_absen)}
                                         </p>
                                         <div className="flex flex-wrap items-center gap-2">
-                                            <span className={`rounded-full px-3 py-1 text-xs font-black capitalize ${getStatusBadge(item.status)}`}>
-                                                {item.status}
+                                            <span className={`rounded-full px-3 py-1 text-xs font-black ${getStatusBadge(item)}`}>
+                                                    {getStatusLabel(item)}
                                             </span>
                                             {item.foto ? (
                                                 <a
@@ -361,8 +394,8 @@ export default function ClassAttendance({
                                                 {formatTanggal(item.waktu_absen)}
                                             </td>
                                             <td className="p-3 capitalize">
-                                                <span className={`rounded-full px-3 py-1 text-xs font-black ${getStatusBadge(item.status)}`}>
-                                                    {item.status}
+                                                <span className={`rounded-full px-3 py-1 text-xs font-black ${getStatusBadge(item)}`}>
+                                                        {getStatusLabel(item)}
                                                 </span>
                                             </td>
                                             <td className="p-3">

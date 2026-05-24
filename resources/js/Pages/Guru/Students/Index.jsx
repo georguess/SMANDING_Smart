@@ -1,6 +1,10 @@
 import { router } from "@inertiajs/react";
 import { useState } from "react";
 import GuruLayout from "@/Layouts/GuruLayout";
+import {
+    RiSchoolLine,
+    RiGroupLine,
+} from "@remixicon/react";
 
 export default function Index({ siswas, kelasWali = [], filters = {} }) {
     const [search, setSearch] = useState(filters.search || "");
@@ -14,7 +18,7 @@ export default function Index({ siswas, kelasWali = [], filters = {} }) {
         {
             label: "Total Kelas",
             value: totalKelas,
-            icon: "🏫",
+            icon: RiSchoolLine,
             description: "Kelas yang diwalikan",
             iconBox: "bg-cyan-100 text-cyan-700",
             bubble: "bg-cyan-50",
@@ -23,7 +27,7 @@ export default function Index({ siswas, kelasWali = [], filters = {} }) {
         {
             label: "Total Siswa",
             value: totalSiswa,
-            icon: "👥",
+            icon: RiGroupLine,
             description: "Siswa dalam kelas wali",
             iconBox: "bg-blue-100 text-blue-700",
             bubble: "bg-blue-50",
@@ -93,9 +97,12 @@ export default function Index({ siswas, kelasWali = [], filters = {} }) {
                             <div className="relative">
                                 <div className="mb-5 flex items-start justify-between gap-3 sm:mb-6">
                                     <div
-                                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-xl sm:h-14 sm:w-14 sm:text-2xl ${card.iconBox}`}
+                                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl sm:h-14 sm:w-14 ${card.iconBox}`}
                                     >
-                                        {card.icon}
+                                        {(() => {
+                                            const Icon = card.icon;
+                                            return <Icon size={26} className="sm:h-7 sm:w-7" />;
+                                        })()}
                                     </div>
                                     <span className="rounded-full bg-slate-50 px-3 py-1 text-xs font-bold text-slate-500">
                                         Ringkasan

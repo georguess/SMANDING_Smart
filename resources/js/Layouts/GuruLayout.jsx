@@ -1,5 +1,12 @@
 import { Head, Link, usePage } from "@inertiajs/react";
 import { useState } from "react";
+import {
+    RiDashboardLine,
+    RiGroupLine,
+    RiFileList3Line,
+    RiSettings3Line,
+    RiLogoutBoxRLine,
+} from "@remixicon/react";
 
 export default function GuruLayout({ title = "Dashboard Guru", children }) {
     const { auth } = usePage().props;
@@ -8,29 +15,36 @@ export default function GuruLayout({ title = "Dashboard Guru", children }) {
     const user = auth?.user;
     const pathname = window.location.pathname;
 
-    const displayName = user?.name ?? user?.nama ?? "Guru";
+    const displayName = user?.name ?? user?.nama ?? user?.username ?? "Guru";
     const userEmail = user?.email ?? "-";
     const userInitial = displayName.charAt(0).toUpperCase();
+    const userPhoto = user?.photo_profile ? `/storage/${user.photo_profile}` : null;
 
     const menus = [
-        {
-            label: "Dashboard",
-            href: "/guru/dashboard",
-            match: "/guru/dashboard",
-            icon: "🏠",
-        },
-        {
-            label: "Kelola Siswa",
-            href: "/guru/students",
-            match: "/guru/students",
-            icon: "👥",
-        },
-        {
-            label: "Kelola Absensi",
-            href: "/guru/attendances",
-            match: "/guru/attendances",
-            icon: "📝",
-        },
+    {
+        label: "Dashboard",
+        href: "/guru/dashboard",
+        match: "/guru/dashboard",
+        icon: RiDashboardLine,
+    },
+    {
+        label: "Kelola Siswa",
+        href: "/guru/students",
+        match: "/guru/students",
+        icon: RiGroupLine,
+    },
+    {
+        label: "Kelola Absensi",
+        href: "/guru/attendances",
+        match: "/guru/attendances",
+        icon: RiFileList3Line,
+    },
+    {
+        label: "Settings",
+        href: "/guru/settings",
+        match: "/guru/settings",
+        icon: RiSettings3Line,
+    },
     ];
 
     const isActive = (menu) => {
@@ -69,7 +83,7 @@ export default function GuruLayout({ title = "Dashboard Guru", children }) {
                                         SMANDING
                                     </h1>
                                     <p className="text-xs font-medium text-cyan-50 sm:text-sm">
-                                        Panel Guru
+                                        SMA N 1 GADINGREJO
                                     </p>
                                 </div>
                             </div>
@@ -91,10 +105,18 @@ export default function GuruLayout({ title = "Dashboard Guru", children }) {
                                                 : "text-white/90 hover:bg-cyan-800 hover:text-white"
                                         }`}
                                     >
-                                        <span className="text-lg sm:text-xl">
-                                            {menu.icon}
-                                        </span>
-                                        <span>{menu.label}</span>
+                                        {(() => {
+    const Icon = menu.icon;
+
+    return (
+        <Icon
+            size={22}
+            className="shrink-0"
+        />
+    );
+})()}
+
+<span>{menu.label}</span>
                                         {isActive(menu) && (
                                             <span className="absolute right-4 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100 sm:right-5" />
                                         )}
@@ -103,37 +125,40 @@ export default function GuruLayout({ title = "Dashboard Guru", children }) {
                             </div>
                         </nav>
 
-                        <div className="border-t border-white/20 p-4 sm:p-5">
-                            <div className="mb-4 rounded-2xl bg-cyan-800/70 p-4 shadow-inner">
-                                <div className="mb-3 flex items-center gap-3">
-                                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-base font-black text-cyan-700">
-                                        {userInitial}
-                                    </div>
-                                    <div className="min-w-0">
-                                        <p className="truncate text-sm font-black text-white">
-                                            {displayName}
-                                        </p>
-                                        <p className="text-xs font-medium text-cyan-100">
-                                            Guru / Wali Kelas
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="rounded-xl bg-white/10 px-3 py-2">
-                                    <p className="truncate text-xs text-cyan-50">
-                                        {userEmail}
-                                    </p>
-                                </div>
-                            </div>
+                        <div className="border-t border-white/15 p-4">
+    <div className="flex items-center gap-3 rounded-2xl bg-cyan-800/80 p-3 shadow-inner">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white text-base font-black text-cyan-700 shadow-sm">
+    {userPhoto ? (
+        <img
+            src={userPhoto}
+            alt="Foto Profil"
+            className="h-full w-full object-cover"
+        />
+    ) : (
+        userInitial
+    )}
+</div>
 
-                            <Link
-                                href="/logout"
-                                method="post"
-                                as="button"
-                                className="w-full rounded-2xl bg-red-500 px-4 py-3 text-sm font-black text-white shadow-lg transition hover:bg-red-600"
-                            >
-                                Logout
-                            </Link>
-                        </div>
+        <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-black text-white">
+                {displayName}
+            </p>
+            <p className="truncate text-[11px] font-medium text-cyan-100">
+                Guru / Wali Kelas
+            </p>
+        </div>
+
+        <Link
+            href="/logout"
+            method="post"
+            as="button"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-500 text-sm font-black text-white shadow-sm transition hover:bg-rose-600"
+            title="Logout"
+        >
+            <RiLogoutBoxRLine size={20} />
+        </Link>
+    </div>
+</div>
                     </div>
                 </aside>
 
@@ -168,9 +193,17 @@ export default function GuruLayout({ title = "Dashboard Guru", children }) {
                                             Guru / Wali Kelas
                                         </p>
                                     </div>
-                                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-cyan-700 text-xl font-black text-white">
-                                        {userInitial}
-                                    </div>
+                                    <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-cyan-700 text-xl font-black text-white">
+    {userPhoto ? (
+        <img
+            src={userPhoto}
+            alt="Foto Profil"
+            className="h-full w-full object-cover"
+        />
+    ) : (
+        userInitial
+    )}
+</div>
                                 </div>
                             </div>
                         </div>

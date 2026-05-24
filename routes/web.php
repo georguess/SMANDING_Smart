@@ -19,6 +19,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\Guru\DashboardController as GuruDashboardController;
 use App\Http\Controllers\Guru\StudentController as GuruStudentController;
 use App\Http\Controllers\Guru\AttendanceController as GuruAttendanceController;
+use App\Http\Controllers\Guru\SettingController as GuruSettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -92,7 +93,16 @@ Route::middleware(['auth', 'role:guru'])
 
         Route::patch('/attendances/{attendance}/status', [GuruAttendanceController::class, 'updateStatus'])
             ->name('attendances.updateStatus');
-    });
+
+        Route::get('/settings', [GuruSettingController::class, 'index'])
+            ->name('settings.index');
+
+        Route::post('/settings/photo', [GuruSettingController::class, 'updatePhoto'])
+            ->name('settings.photo');
+
+        Route::put('/settings/password', [GuruSettingController::class, 'updatePassword'])
+            ->name('settings.password');
+            });
 
 
 Route::middleware(['auth', 'role:admin'])

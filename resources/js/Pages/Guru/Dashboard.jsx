@@ -1,5 +1,14 @@
 import GuruLayout from "@/Layouts/GuruLayout";
-
+import {
+    RiSchoolLine,
+    RiGroupLine,
+    RiFileList3Line,
+    RiBarChartBoxLine,
+    RiCheckboxCircleLine,
+    RiInformationLine,
+    RiHeartPulseLine,
+    RiCloseCircleLine,
+} from "@remixicon/react";
 export default function Dashboard({
     summary = {},
     kelasWali = [],
@@ -10,7 +19,7 @@ export default function Dashboard({
         {
             label: "Total Kelas",
             value: summary.total_kelas ?? 0,
-            icon: "🏫",
+            icon: RiSchoolLine,
             description: "Kelas yang diwalikan",
             iconBox: "bg-cyan-100 text-cyan-700",
             bubble: "bg-cyan-50",
@@ -19,7 +28,7 @@ export default function Dashboard({
         {
             label: "Total Siswa",
             value: summary.total_siswa ?? 0,
-            icon: "👥",
+            icon: RiGroupLine,
             description: "Siswa dalam kelas wali",
             iconBox: "bg-blue-100 text-blue-700",
             bubble: "bg-blue-50",
@@ -28,7 +37,7 @@ export default function Dashboard({
         {
             label: "Absensi Hari Ini",
             value: summary.absensi_hari_ini ?? 0,
-            icon: "📝",
+            icon: RiFileList3Line,
             description: "Data absensi hari ini",
             iconBox: "bg-emerald-100 text-emerald-700",
             bubble: "bg-emerald-50",
@@ -37,7 +46,7 @@ export default function Dashboard({
         {
             label: "Persentase Hadir",
             value: `${summary.persentase_hadir ?? 0}%`,
-            icon: "📊",
+            icon: RiBarChartBoxLine,
             description: "Tingkat kehadiran harian",
             iconBox: "bg-amber-100 text-amber-700",
             bubble: "bg-amber-50",
@@ -49,7 +58,7 @@ export default function Dashboard({
         {
             label: "Hadir",
             value: summary.hadir_hari_ini ?? 0,
-            icon: "✓",
+            icon: RiCheckboxCircleLine,
             color: "text-emerald-600",
             bg: "bg-emerald-50",
             iconBg: "bg-emerald-100",
@@ -57,7 +66,7 @@ export default function Dashboard({
         {
             label: "Izin",
             value: summary.izin_hari_ini ?? 0,
-            icon: "I",
+            icon: RiInformationLine,
             color: "text-blue-600",
             bg: "bg-blue-50",
             iconBg: "bg-blue-100",
@@ -65,7 +74,7 @@ export default function Dashboard({
         {
             label: "Sakit",
             value: summary.sakit_hari_ini ?? 0,
-            icon: "S",
+            icon: RiHeartPulseLine,
             color: "text-amber-600",
             bg: "bg-amber-50",
             iconBg: "bg-amber-100",
@@ -73,7 +82,7 @@ export default function Dashboard({
         {
             label: "Alfa",
             value: summary.alfa_hari_ini ?? 0,
-            icon: "A",
+            icon: RiCloseCircleLine,
             color: "text-red-600",
             bg: "bg-red-50",
             iconBg: "bg-red-100",
@@ -135,9 +144,12 @@ export default function Dashboard({
                             <div className="relative">
                                 <div className="mb-5 flex items-start justify-between gap-3 sm:mb-6">
                                     <div
-                                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-xl sm:h-14 sm:w-14 sm:text-2xl ${card.iconBox}`}
+                                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl sm:h-14 sm:w-14 ${card.iconBox}`}
                                     >
-                                        {card.icon}
+                                        {(() => {
+                                            const Icon = card.icon;
+                                            return <Icon size={26} className="sm:h-7 sm:w-7" />;
+                                        })()}
                                     </div>
                                     <span className="rounded-full bg-slate-50 px-3 py-1 text-xs font-bold text-slate-500">
                                         Ringkasan
@@ -178,9 +190,12 @@ export default function Dashboard({
                                     </h2>
                                 </div>
                                 <div
-                                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-base font-black sm:h-14 sm:w-14 sm:text-xl ${card.iconBg} ${card.color}`}
+                                    className={`flex h-14 w-14 items-center justify-center rounded-2xl ${card.iconBg} ${card.color}`}
                                 >
-                                    {card.icon}
+                                    {(() => {
+                                        const Icon = card.icon;
+                                        return <Icon size={28} />;
+                                    })()}
                                 </div>
                             </div>
                         </div>
