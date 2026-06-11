@@ -4,13 +4,11 @@ import { formatDateTime } from "@/Utils/FormatDate";
 
 export default function ClassAttendance({
     classData,
-    semesters,
     attendances,
     statusCounts,
     filters,
 }) {
     const [filterData, setFilterData] = useState({
-        semester_id: filters.semester_id || "",
         month: filters.month || "",
         year: filters.year || new Date().getFullYear(),
         status: filters.status || "",
@@ -60,14 +58,17 @@ export default function ClassAttendance({
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
+        <div className="min-h-screen bg-slate-100 rounded-xl p-6">
             <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">
                         Absensi {classData.nama_kelas}
                     </h1>
                     <p className="text-sm text-gray-500">
-                        Tahun Ajaran: {classData.tahun_ajaran} | Wali Kelas:{" "}
+                        Semester: {" "}
+    {classData.semester
+        ? `${classData.semester.semester} - ${classData.semester.tahun_akademik}`
+        : "-"}{" "} | Wali Kelas:{" "}
                         {classData.wali_kelas?.nama || "-"} | Jumlah Siswa:{" "}
                         {classData.siswas_count}
                     </p>
@@ -75,7 +76,7 @@ export default function ClassAttendance({
 
                 <Link
                     href="/admin/attendances"
-                    className="rounded-lg bg-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-400"
+                    className="w-fit self-start rounded-lg bg-cyan-500 px-3 py-2 text-xs font-semibold text-white hover:bg-cyan-600 md:self-auto md:px-4 md:text-sm"
                 >
                     Kembali
                 </Link>
@@ -114,33 +115,8 @@ export default function ClassAttendance({
             <div className="mb-4 rounded-xl bg-white p-4 shadow">
                 <form
                     onSubmit={handleFilter}
-                    className="grid grid-cols-1 gap-3 md:grid-cols-5"
+                    className="grid grid-cols-1 gap-3 md:grid-cols-4"
                 >
-                    <div>
-                        <label className="mb-1 block text-sm font-medium">
-                            Semester
-                        </label>
-                        <select
-                            value={filterData.semester_id}
-                            onChange={(e) =>
-                                setFilterData({
-                                    ...filterData,
-                                    semester_id: e.target.value,
-                                })
-                            }
-                            className="w-full rounded-lg border px-3 py-2"
-                        >
-                            <option value="">Semua Semester</option>
-                            {semesters.map((semester) => (
-                                <option key={semester.id} value={semester.id}>
-                                    {semester.nama || semester.name} -{" "}
-                                    {semester.tahun_ajaran ||
-                                        semester.academic_year}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
                     <div>
                         <label className="mb-1 block text-sm font-medium">
                             Bulan
@@ -206,7 +182,7 @@ export default function ClassAttendance({
                     <div className="flex items-end">
                         <button
                             type="submit"
-                            className="w-full rounded-lg bg-[#853953] px-4 py-2 text-sm font-semibold text-white hover:bg-[#612D53]"
+                            className="w-full rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600"
                         >
                             Filter
                         </button>
@@ -321,12 +297,12 @@ export default function ClassAttendance({
                         onClick={() => link.url && router.get(link.url)}
                         className={`rounded-lg px-3 py-2 text-sm ${
                             link.active
-                                ? "bg-[#853953] text-white"
+                                ? "bg-cyan-500 text-white"
                                 : "bg-white text-gray-700"
                         } ${
                             !link.url
                                 ? "cursor-not-allowed opacity-50"
-                                : "hover:bg-gray-200"
+                                : "hover:bg-cyan-600"
                         }`}
                         dangerouslySetInnerHTML={{ __html: link.label }}
                     />
@@ -335,3 +311,5 @@ export default function ClassAttendance({
         </div>
     );
 }
+ClassAttendance.title = "Kelola Absensi";
+ClassAttendance.subtitle = "Tambah, edit, hapus, dan reset absensi.";

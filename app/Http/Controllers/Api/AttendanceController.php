@@ -62,7 +62,10 @@ class AttendanceController extends Controller
             }
         }
 
-        $semester = Semester::orderByDesc('id')->first();
+        $semester = Semester::where('is_active', true)->first();
+        $semester = Semester::orderByDesc('is_active')
+        ->orderByDesc('id')
+        ->get();
 
         $fotoPath = null;
 
@@ -99,7 +102,7 @@ class AttendanceController extends Controller
             'user_id' => $siswa->user_id,
             'siswa_id' => $siswa->id,
             'kelas_id' => $siswa->kelas_id,
-            'semester_id' => $semester?->id,
+            'semester_id' => $siswa->kelas?->semester_id,
             'rfid_reader_id' => $validated['rfid_reader_id'] ?? null,
             'waktu_absen' => now(),
             'status' => 'hadir',

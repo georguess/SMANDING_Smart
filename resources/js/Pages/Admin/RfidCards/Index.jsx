@@ -47,7 +47,7 @@ export default function Index({ rfidCards, siswas, filters }) {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
+        <div className="min-h-screen bg-slate-100 rounded-xl p-6">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">
                     Kelola RFID Card
@@ -121,7 +121,7 @@ export default function Index({ rfidCards, siswas, filters }) {
                         <button
                             type="submit"
                             disabled={processing}
-                            className="w-full rounded-lg bg-[#853953] px-4 py-2 text-sm font-semibold text-white hover:bg-[#612D53]"
+                            className="w-full rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600"
                         >
                             Simpan RFID
                         </button>
@@ -136,12 +136,12 @@ export default function Index({ rfidCards, siswas, filters }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari UID, nama siswa, NIS, kelas, atau status..."
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#853953] focus:outline-none"
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none"
                     />
 
                     <button
                         type="submit"
-                        className="rounded-lg bg-[#853953] px-4 py-2 text-sm font-semibold text-white hover:bg-[#612D53]"
+                        className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600"
                     >
                         Cari
                     </button>
@@ -239,12 +239,12 @@ export default function Index({ rfidCards, siswas, filters }) {
                         onClick={() => link.url && router.get(link.url)}
                         className={`rounded-lg px-3 py-2 text-sm ${
                             link.active
-                                ? "bg-[#853953] text-white"
+                                ? "bg-cyan-500 text-white"
                                 : "bg-white text-gray-700"
                         } ${
                             !link.url
                                 ? "cursor-not-allowed opacity-50"
-                                : "hover:bg-gray-200"
+                                : "hover:bg-cyan-600"
                         }`}
                         dangerouslySetInnerHTML={{ __html: link.label }}
                     />
@@ -253,3 +253,6 @@ export default function Index({ rfidCards, siswas, filters }) {
         </div>
     );
 }
+
+Index.title = "Data RFID Card";
+Index.subtitle = "Tambah, edit, hapus, dan reset RFID card.";

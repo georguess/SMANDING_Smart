@@ -5,22 +5,22 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Guru;
 use App\Models\Kelas;
+use App\Models\Semester;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class SchoolClassController extends Controller
 {
-     public function index(Request $request)
+    public function index(Request $request)
     {
         $search = $request->input('search');
 
-        $classes = Kelas::with(['waliKelas.user'])
+        $classes = Kelas::with(['waliKelas.user', 'semester'])
             ->withCount('siswas')
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('nama_kelas', 'like', "%{$search}%")
-                        ->orWhere('tahun_ajaran', 'like', "%{$search}%")
                         ->orWhereHas('waliKelas', function ($guruQuery) use ($search) {
                             $guruQuery->where('nama', 'like', "%{$search}%")
                                 ->orWhere('nip', 'like', "%{$search}%");
@@ -28,19 +28,13 @@ class SchoolClassController extends Controller
                         ->orWhereHas('waliKelas.user', function ($userQuery) use ($search) {
                             $userQuery->where('username', 'like', "%{$search}%")
                                 ->orWhere('email', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('semester', function ($semesterQuery) use ($search) {
+                            $semesterQuery->where('semester', 'like', "%{$search}%")
+                                ->orWhere('tahun_akademik', 'like', "%{$search}%");
                         });
                 });
             })
-            // Syntax postgree
-//             ->orderByRaw("
-            //     CASE
-            //         WHEN nama_kelas ILIKE 'XII%' THEN 3
-            //         WHEN nama_kelas ILIKE 'XI%' THEN 2
-            //         WHEN nama_kelas ILIKE 'X%' THEN 1
-            //         ELSE 4
-            //     END ASC
-            // ")
-            // ->orderByRaw("NULLIF(regexp_replace(nama_kelas, '[^0-9]', '', 'g'), '')::int ASC")
             ->orderByRaw("
                 CASE
                     WHEN nama_kelas LIKE 'XII%' THEN 3
@@ -61,15 +55,19 @@ class SchoolClassController extends Controller
         ]);
     }
 
-    
     public function create()
     {
         $teachers = Guru::with('user')
             ->orderBy('nama')
             ->get();
 
+        $semesters = Semester::orderByDesc('tahun_akademik')
+            ->orderBy('semester')
+            ->get();
+
         return Inertia::render('Admin/Classes/Create', [
             'teachers' => $teachers,
+            'semesters' => $semesters,
         ]);
     }
 
@@ -81,10 +79,12 @@ class SchoolClassController extends Controller
                 'string',
                 'max:50',
                 Rule::unique('kelas', 'nama_kelas')
-                    ->where('tahun_ajaran', $request->tahun_ajaran),
+                    ->where(fn ($query) => $query->where('tahun_ajaran', $request->tahun_ajaran)),
             ],
             'guru_id' => ['required', 'exists:gurus,id'],
             'tahun_ajaran' => ['required', 'string', 'max:20'],
+        ],[
+            'nama_kelas.unique' => 'Kombinasi nama kelas dan tahun akademik tersebut sudah ada',
         ]);
 
         Kelas::create($validated);
@@ -96,15 +96,20 @@ class SchoolClassController extends Controller
 
     public function edit(Kelas $class)
     {
-        $class->load(['waliKelas.user']);
+        $class->load(['waliKelas.user', 'semester']);
 
         $teachers = Guru::with('user')
             ->orderBy('nama')
             ->get();
 
+        $semesters = Semester::orderByDesc('tahun_akademik')
+            ->orderBy('semester')
+            ->get();
+
         return Inertia::render('Admin/Classes/Edit', [
             'classData' => $class,
             'teachers' => $teachers,
+            'semesters' => $semesters,
         ]);
     }
 
@@ -116,11 +121,13 @@ class SchoolClassController extends Controller
                 'string',
                 'max:50',
                 Rule::unique('kelas', 'nama_kelas')
-                    ->where('tahun_ajaran', $request->tahun_ajaran)
+                    ->where(fn ($query) => $query->where('tahun_ajaran', $request->tahun_ajaran))
                     ->ignore($class->id),
             ],
             'guru_id' => ['required', 'exists:gurus,id'],
             'tahun_ajaran' => ['required', 'string', 'max:20'],
+        ],[
+            'nama_kelas.unique' => 'Kombinasi nama kelas dan tahun akademik tersebut sudah ada',
         ]);
 
         $class->update($validated);

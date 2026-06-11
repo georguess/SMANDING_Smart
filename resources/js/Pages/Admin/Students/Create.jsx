@@ -22,7 +22,7 @@ export default function Create({ classes }) {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
+        <div className="min-h-screen bg-slate-100 rounded-xl p-6">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">
                     Tambah Siswa
@@ -199,7 +199,7 @@ export default function Create({ classes }) {
                     <button
                         type="submit"
                         disabled={processing}
-                        className="rounded-lg bg-[#853953] px-4 py-2 text-sm font-semibold text-white hover:bg-[#612D53] disabled:opacity-60"
+                        className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600 disabled:opacity-60"
                     >
                         Simpan
                     </button>
@@ -215,3 +215,6 @@ export default function Create({ classes }) {
         </div>
     );
 }
+
+Create.title = "Data Siswa";
+Create.subtitle = "Tambah data siswa.";

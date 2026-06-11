@@ -1,11 +1,11 @@
 import React from "react";
 import { Link, useForm } from "@inertiajs/react";
 
-export default function Edit({ classData, teachers }) {
+export default function Edit({ classData, teachers, academicYears, semesters }) {
     const { data, setData, put, processing, errors } = useForm({
         nama_kelas: classData.nama_kelas || "",
         guru_id: classData.guru_id || "",
-        tahun_ajaran: classData.tahun_ajaran || "",
+        semester_id: classData.semester_id || "",
     });
 
     const submit = (e) => {
@@ -14,7 +14,7 @@ export default function Edit({ classData, teachers }) {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
+        <div className="min-h-screen bg-slate-100 rounded-xl p-6">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">
                     Edit Kelas
@@ -47,16 +47,21 @@ export default function Edit({ classData, teachers }) {
 
                     <div>
                         <label className="mb-1 block text-sm font-medium">
-                            Tahun Ajaran
+                            Tahun Akademik
                         </label>
-                        <input
-                            type="text"
-                            value={data.tahun_ajaran}
-                            onChange={(e) =>
-                                setData("tahun_ajaran", e.target.value)
-                            }
+                        <select
+                            value={data.semester_id}
+                            onChange={(e) => setData("semester_id", e.target.value)}
                             className="w-full rounded-lg border px-3 py-2"
-                        />
+                        >
+                            <option value="">Pilih tahun akademik</option>
+
+                            {semesters.map((semester) => (
+                                <option key={semester.id} value={semester.id}>
+                                    {semester.semester} - {semester.tahun_akademik}
+                                </option>
+                            ))}
+                        </select>
                         {errors.tahun_ajaran && (
                             <p className="mt-1 text-sm text-red-500">
                                 {errors.tahun_ajaran}
@@ -92,7 +97,7 @@ export default function Edit({ classData, teachers }) {
                     <button
                         type="submit"
                         disabled={processing}
-                        className="rounded-lg bg-[#853953] px-4 py-2 text-sm font-semibold text-white hover:bg-[#612D53]"
+                        className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600"
                     >
                         Update
                     </button>
@@ -108,3 +113,5 @@ export default function Edit({ classData, teachers }) {
         </div>
     );
 }
+Edit.title = "Data Kelas";
+Edit.subtitle = "Kelola data kelas siswa.";

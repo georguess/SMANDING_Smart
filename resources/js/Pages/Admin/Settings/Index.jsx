@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useForm } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 
-export default function Settings({ user }) {
+export default function Index({ user }) {
     const [preview, setPreview] = useState(
         user.photo_profile ? `/storage/${user.photo_profile}` : null
     );
@@ -119,7 +120,7 @@ export default function Settings({ user }) {
                         <button
                             type="submit"
                             disabled={profileForm.processing}
-                            className="mt-4 rounded-lg bg-[#853953] px-4 py-2 text-sm font-semibold text-white hover:bg-[#612D53]"
+                            className="mt-4 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600"
                         >
                             Simpan Foto
                         </button>
@@ -207,7 +208,7 @@ export default function Settings({ user }) {
                         <button
                             type="submit"
                             disabled={passwordForm.processing}
-                            className="rounded-lg bg-[#853953] px-4 py-2 text-sm font-semibold text-white hover:bg-[#612D53]"
+                            className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600"
                         >
                             Simpan Password
                         </button>
@@ -217,3 +218,6 @@ export default function Settings({ user }) {
         </div>
     );
 }
+
+Index.title = "Settings";
+Index.subtitle = "Atur akun anda.";

@@ -27,7 +27,7 @@ export default function Edit({ teacher }) {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
+        <div className="min-h-screen bg-slate-100 rounded-xl p-6">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">
                     Edit Guru
@@ -198,7 +198,7 @@ export default function Edit({ teacher }) {
                     <button
                         type="submit"
                         disabled={processing}
-                        className="rounded-lg bg-[#853953] px-4 py-2 text-sm font-semibold text-white hover:bg-[#612D53]"
+                        className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600"
                     >
                         Update
                     </button>
@@ -214,3 +214,6 @@ export default function Edit({ teacher }) {
         </div>
     );
 }
+
+Edit.title = "Data Guru";
+Edit.subtitle = "Edit data guru.";

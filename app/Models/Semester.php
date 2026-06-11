@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Semester extends Model
 {
@@ -13,9 +12,15 @@ class Semester extends Model
     protected $fillable = [
         'semester',
         'tahun_akademik',
+        'is_active',
     ];
 
-    public function attendances(){
-        return $this->hasMany(Attendance::class);
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'semester_id');
     }
 }

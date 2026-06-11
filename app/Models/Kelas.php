@@ -14,6 +14,7 @@ class Kelas extends Model
     protected $fillable = [
         'nama_kelas',
         'guru_id',
+        'semester_id',
         'tahun_ajaran',
     ];
 
@@ -31,4 +32,9 @@ class Kelas extends Model
     {
         return $this->hasMany(Attendance::class, 'kelas_id');
     }
+
+    public function semester()
+{
+    return $this->belongsTo(Semester::class, 'semester_id');
+}
 }
