@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\RfidReaderController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LiveAttendanceController;
 use Illuminate\Foundation\Application;
+use App\Http\Controllers\Admin\SemesterController;
 use Inertia\Inertia;
 
 /*
@@ -124,6 +125,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/reports/attendance/export-pdf', [ReportController::class, 'exportPdf'])
             ->name('reports.attendance.pdf');
 
+        Route::get('/settings', [SettingController::class, 'index'])
+            ->name('settings.index');
+        
         Route::get('/settings', [SettingController::class, 'edit'])
             ->name('settings.edit');
 
@@ -135,6 +139,11 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::patch('/students/{student}/reset-password', [StudentController::class, 'resetPassword'])
             ->name('students.resetPassword');
+        
+        Route::resource('/semesters', SemesterController::class);
+
+        Route::patch('/semesters/{semester}/set-active', [SemesterController::class, 'setActive'])
+            ->name('semesters.setActive');
     });
 
 

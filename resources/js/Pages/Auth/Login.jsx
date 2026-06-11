@@ -22,12 +22,7 @@ export default function Login({ status, canResetPassword }) {
 
             <div className="min-h-screen bg-slate-50 p-4 md:p-8">
                 <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl overflow-hidden rounded-[2rem] bg-white shadow-2xl lg:grid-cols-2">
-                    <div className="relative hidden overflow-hidden bg-gradient-to-br from-sky-500 via-cyan-500 to-blue-700 lg:block">
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.35),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(250,204,21,0.35),transparent_35%)]" />
-
-                        <div className="absolute -left-24 top-24 h-72 w-72 rounded-full bg-white/20 blur-3xl" />
-                        <div className="absolute -right-20 bottom-20 h-80 w-80 rounded-full bg-amber-300/30 blur-3xl" />
-
+                    <div className="relative hidden overflow-hidden bg-cyan-700 lg:block">
                         <div className="relative flex h-full flex-col justify-between p-12 text-white">
                             <div className="flex items-center gap-4">
                                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-2 shadow-lg">
@@ -65,7 +60,7 @@ export default function Login({ status, canResetPassword }) {
                             </div>
 
                             <div className="grid grid-cols-3 gap-4">
-                                <div className="rounded-2xl bg-white/15 p-4 backdrop-blur">
+                                <div className="rounded-2xl bg-white/15 p-4 backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-md">
                                     <p className="text-2xl font-extrabold">
                                         RFID
                                     </p>
@@ -74,7 +69,7 @@ export default function Login({ status, canResetPassword }) {
                                     </p>
                                 </div>
 
-                                <div className="rounded-2xl bg-white/15 p-4 backdrop-blur">
+                                <div className="rounded-2xl bg-white/15 p-4 backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-md">
                                     <p className="text-2xl font-extrabold">
                                         Live
                                     </p>
@@ -83,7 +78,7 @@ export default function Login({ status, canResetPassword }) {
                                     </p>
                                 </div>
 
-                                <div className="rounded-2xl bg-white/15 p-4 backdrop-blur">
+                                <div className="rounded-2xl bg-white/15 p-4 backdrop-blur transition duration-300 hover:-translate-y-1 hover:shadow-md">
                                     <p className="text-2xl font-extrabold">
                                         Web
                                     </p>
@@ -243,7 +238,7 @@ export default function Login({ status, canResetPassword }) {
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="w-full rounded-2xl bg-gradient-to-r from-sky-500 via-cyan-500 to-blue-700 px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-sky-200 transition hover:from-sky-600 hover:via-cyan-600 hover:to-blue-800 disabled:cursor-not-allowed disabled:opacity-70"
+                                    className="w-full rounded-2xl bg-cyan-700 px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-sky-200 transition hover:from-sky-600 hover:via-cyan-600 hover:to-blue-800 disabled:cursor-not-allowed disabled:opacity-70"
                                 >
                                     {processing ? "Memproses..." : "Masuk"}
                                 </button>

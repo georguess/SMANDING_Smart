@@ -23,7 +23,7 @@ export default function Edit({ student, classes }) {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
+        <div className="min-h-screen bg-slate-100 p-6 rounded-xl">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">
                     Edit Siswa
@@ -164,7 +164,7 @@ export default function Edit({ student, classes }) {
                             <option value="">Pilih kelas</option>
                             {classes.map((item) => (
                                 <option key={item.id} value={item.id}>
-                                    {item.nama_kelas} - {item.tahun_ajaran}
+                                    {item.nama_kelas}
                                 </option>
                             ))}
                         </select>
@@ -211,7 +211,7 @@ export default function Edit({ student, classes }) {
                     <button
                         type="submit"
                         disabled={processing}
-                        className="rounded-lg bg-[#853953] px-4 py-2 text-sm font-semibold text-white hover:bg-[#612D53] disabled:opacity-60"
+                        className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600 disabled:opacity-60"
                     >
                         Update
                     </button>
@@ -227,3 +227,6 @@ export default function Edit({ student, classes }) {
         </div>
     );
 }
+
+Edit.title = "Data Siswa";
+Edit.subtitle = "Edit data siswa.";

@@ -1,20 +1,23 @@
 import React from "react";
 import { Link, useForm } from "@inertiajs/react";
 
-export default function Create({ teachers }) {
+export default function Create({ teachers = [], semesters = [] }) {
     const { data, setData, post, processing, errors } = useForm({
         nama_kelas: "",
         guru_id: "",
-        tahun_ajaran: "",
+        semester_id: "",
     });
 
     const submit = (e) => {
         e.preventDefault();
-        post("/admin/classes");
+
+        post("/admin/classes", {
+            preserveScroll: true,
+        });
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
+        <div className="min-h-screen bg-slate-100 rounded-xl p-6">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">
                     Tambah Kelas
@@ -30,15 +33,17 @@ export default function Create({ teachers }) {
                         <label className="mb-1 block text-sm font-medium">
                             Nama Kelas
                         </label>
+
                         <input
                             type="text"
                             value={data.nama_kelas}
                             onChange={(e) =>
                                 setData("nama_kelas", e.target.value)
                             }
-                            placeholder="Contoh: XII 7"
                             className="w-full rounded-lg border px-3 py-2"
+                            placeholder="Contoh: XII 7"
                         />
+
                         {errors.nama_kelas && (
                             <p className="mt-1 text-sm text-red-500">
                                 {errors.nama_kelas}
@@ -48,20 +53,28 @@ export default function Create({ teachers }) {
 
                     <div>
                         <label className="mb-1 block text-sm font-medium">
-                            Tahun Ajaran
+                            Tahun Akademik
                         </label>
-                        <input
-                            type="text"
-                            value={data.tahun_ajaran}
+
+                        <select
+                            value={data.semester_id}
                             onChange={(e) =>
-                                setData("tahun_ajaran", e.target.value)
+                                setData("semester_id", e.target.value)
                             }
-                            placeholder="Contoh: 2025/2026"
                             className="w-full rounded-lg border px-3 py-2"
-                        />
-                        {errors.tahun_ajaran && (
+                        >
+                            <option value="">Pilih tahun akademik</option>
+
+                            {semesters.map((semester) => (
+                                <option key={semester.id} value={semester.id}>
+                                    {semester.semester} - {semester.tahun_akademik}
+                                </option>
+                            ))}
+                        </select>
+
+                        {errors.semester_id && (
                             <p className="mt-1 text-sm text-red-500">
-                                {errors.tahun_ajaran}
+                                {errors.semester_id}
                             </p>
                         )}
                     </div>
@@ -70,18 +83,23 @@ export default function Create({ teachers }) {
                         <label className="mb-1 block text-sm font-medium">
                             Wali Kelas
                         </label>
+
                         <select
                             value={data.guru_id}
-                            onChange={(e) => setData("guru_id", e.target.value)}
+                            onChange={(e) =>
+                                setData("guru_id", e.target.value)
+                            }
                             className="w-full rounded-lg border px-3 py-2"
                         >
                             <option value="">Pilih wali kelas</option>
+
                             {teachers.map((teacher) => (
                                 <option key={teacher.id} value={teacher.id}>
                                     {teacher.nama} - {teacher.nip}
                                 </option>
                             ))}
                         </select>
+
                         {errors.guru_id && (
                             <p className="mt-1 text-sm text-red-500">
                                 {errors.guru_id}
@@ -94,9 +112,9 @@ export default function Create({ teachers }) {
                     <button
                         type="submit"
                         disabled={processing}
-                        className="rounded-lg bg-[#853953] px-4 py-2 text-sm font-semibold text-white hover:bg-[#612D53]"
+                        className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600 disabled:opacity-50"
                     >
-                        Simpan
+                        {processing ? "Menyimpan..." : "Simpan"}
                     </button>
 
                     <Link
@@ -110,3 +128,6 @@ export default function Create({ teachers }) {
         </div>
     );
 }
+
+Create.title = "Tambah Kelas";
+Create.subtitle = "Tambahkan kelas dan pilih guru sebagai wali kelas.";

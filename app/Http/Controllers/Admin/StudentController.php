@@ -20,7 +20,7 @@ class StudentController extends Controller
     {
         $search = $request->input('search');
 
-        $students = Siswa::with(['user', 'kelas'])
+        $students = Siswa::with(['user', 'kelas.semester'])
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('nama', 'like', "%{$search}%")
@@ -31,12 +31,15 @@ class StudentController extends Controller
                                 ->orWhere('email', 'like', "%{$search}%");
                         })
                         ->orWhereHas('kelas', function ($kelasQuery) use ($search) {
-                            $kelasQuery->where('nama_kelas', 'like', "%{$search}%")
-                                ->orWhere('tahun_ajaran', 'like', "%{$search}%");
+                            $kelasQuery->where('nama_kelas', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('kelas.semester', function ($semesterQuery) use ($search) {
+                            $semesterQuery->where('semester', 'like', "%{$search}%")
+                                ->orWhere('tahun_akademik', 'like', "%{$search}%");
                         });
                 });
             })
-            ->orderBy('nama','asc')
+            ->orderBy('nama', 'asc')
             ->paginate(10)
             ->appends($request->query());
 
@@ -50,9 +53,8 @@ class StudentController extends Controller
 
     public function create()
     {
-        $classes = Kelas::select('id', 'nama_kelas', 'tahun_ajaran')
-            ->orderBy('nama_kelas')
-            ->get();
+        $classes = Kelas::orderBy('nama_kelas')
+        ->get(['id', 'nama_kelas', 'tahun_ajaran']);
 
         return Inertia::render('Admin/Students/Create', [
             'classes' => $classes,
@@ -111,9 +113,8 @@ class StudentController extends Controller
     {
         $student->load(['user', 'kelas']);
 
-        $classes = Kelas::select('id', 'nama_kelas', 'tahun_ajaran')
-            ->orderBy('nama_kelas')
-            ->get();
+        $classes = Kelas::orderBy('nama_kelas')
+        ->get(['id', 'nama_kelas', 'tahun_ajaran']);
 
         return Inertia::render('Admin/Students/Edit', [
             'student' => $student,

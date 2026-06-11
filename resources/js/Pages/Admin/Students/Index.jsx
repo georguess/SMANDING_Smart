@@ -30,7 +30,7 @@ export default function Index({ students, filters }) {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
+        <div className="min-h-screen bg-slate-100 p-6 rounded-xl">
             <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">
@@ -43,7 +43,7 @@ export default function Index({ students, filters }) {
 
                 <Link
                     href="/admin/students/create"
-                    className="rounded-lg bg-[#853953] px-4 py-2 text-sm font-semibold text-white hover:bg-[#612D53]"
+                    className="w-fit self-start rounded-lg bg-cyan-500 px-3 py-2 text-xs font-semibold text-white hover:bg-cyan-600 md:self-auto md:px-4 md:text-sm"
                 >
                     + Tambah Siswa
                 </Link>
@@ -56,20 +56,21 @@ export default function Index({ students, filters }) {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Cari nama, email, NIS, NISN, atau kelas..."
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#853953] focus:outline-none"
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-400 focus:outline-none"
                     />
 
                     <button
                         type="submit"
-                        className="rounded-lg bg-[#853953] px-4 py-2 text-sm font-semibold text-white hover:bg-[#612D53]"
+                        className="w-fit self-start rounded-lg bg-cyan-500 px-3 py-2 text-xs font-semibold text-white hover:bg-cyan-600 md:self-auto md:px-4 md:text-sm"
                     >
                         Cari
                     </button>
                 </form>
             </div>
 
-            <div className="overflow-x-auto rounded-xl bg-white shadow">
-                <table className="w-full text-sm">
+{/* table data */}
+            <div className="w-full overflow-x-auto rounded-2xl bg-white shadow-sm [scrollbar-width:thin]">
+                <table className="min-w-[1100px] w-full text-sm">
                     <thead className="bg-[#2C2C2C] text-white">
                         <tr>
                             <th className="px-4 py-3 text-left">No</th>
@@ -85,93 +86,93 @@ export default function Index({ students, filters }) {
                     </thead>
 
                     <tbody>
-    {students?.data?.length > 0 ? (
-        students.data.map((student, index) => (
-            <tr key={student.id} className="border-b hover:bg-gray-50">
-                <td className="px-4 py-3">
-                    {(students.from ?? 1) + index}
-                </td>
+                        {students?.data?.length > 0 ? (
+                            students.data.map((student, index) => (
+                                <tr key={student.id} className="border-b hover:bg-gray-50">
+                                    <td className="px-4 py-3">
+                                        {(students.from ?? 1) + index}
+                                    </td>
 
-                <td className="px-4 py-3">
-                    {student.user?.photo_profile ? (
-                        <img
-                            src={`/storage/${student.user.photo_profile}`}
-                            alt={student.nama ?? student.user?.username ?? "Siswa"}
-                            className="h-10 w-10 rounded-full object-cover"
-                        />
-                    ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-xs font-bold text-gray-600">
-                            {(student.nama ?? student.user?.username ?? "S").charAt(0)}
-                        </div>
-                    )}
-                </td>
+                                    <td className="px-4 py-3">
+                                        {student.user?.photo_profile ? (
+                                            <img
+                                                src={`/storage/${student.user.photo_profile}`}
+                                                alt={student.nama ?? student.user?.username ?? "Siswa"}
+                                                className="h-10 w-10 rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-xs font-bold text-gray-600">
+                                                {(student.nama ?? student.user?.username ?? "S").charAt(0)}
+                                            </div>
+                                        )}
+                                    </td>
 
-                <td className="px-4 py-3 font-medium">
-                    {student.nama ?? student.user?.username ?? "-"}
-                </td>
+                                    <td className="px-4 py-3 font-medium">
+                                        {student.nama ?? student.user?.username ?? "-"}
+                                    </td>
 
-                <td className="px-4 py-3">
-                    {student.user?.email ?? "-"}
-                </td>
+                                    <td className="px-4 py-3">
+                                        {student.user?.email ?? "-"}
+                                    </td>
 
-                <td className="px-4 py-3">
-                    {student.nis ?? "-"}
-                </td>
+                                    <td className="px-4 py-3">
+                                        {student.nis ?? "-"}
+                                    </td>
 
-                <td className="px-4 py-3">
-                    {student.nisn ?? "-"}
-                </td>
+                                    <td className="px-4 py-3">
+                                        {student.nisn ?? "-"}
+                                    </td>
 
-                <td className="px-4 py-3">
-                    {student.kelas?.nama_kelas ?? "-"}
-                </td>
+                                    <td className="px-4 py-3">
+                                        {student.kelas?.nama_kelas ?? "-"}
+                                    </td>
 
-                <td className="px-4 py-3">
-                    {student.user?.is_active ? (
-                        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                            Aktif
-                        </span>
-                    ) : (
-                        <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
-                            Nonaktif
-                        </span>
-                    )}
-                </td>
+                                    <td className="px-4 py-3">
+                                        {student.user?.is_active ? (
+                                            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                                                Aktif
+                                            </span>
+                                        ) : (
+                                            <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
+                                                Nonaktif
+                                            </span>
+                                        )}
+                                    </td>
 
-                <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-2">
-                        <Link
-                            href={`/admin/students/${student.id}/edit`}
-                            className="rounded-lg bg-blue-500 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-600"
-                        >
-                            Edit
-                        </Link>
+                                    <td className="px-4 py-3">
+                                        <div className="flex flex-nowrap gap-2">
+                                            <Link
+                                                href={`/admin/students/${student.id}/edit`}
+                                                className="rounded-lg bg-blue-500 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-600"
+                                            >
+                                                Edit
+                                            </Link>
 
-                        <button
-                            onClick={() => handleResetPassword(student.id)}
-                            className="rounded-lg bg-yellow-500 px-3 py-1 text-xs font-semibold text-white hover:bg-yellow-600"
-                        >
-                            Reset
-                        </button>
+                                            <button
+                                                onClick={() => handleResetPassword(student.id)}
+                                                className="rounded-lg bg-yellow-500 px-3 py-1 text-xs font-semibold text-white hover:bg-yellow-600"
+                                            >
+                                                Reset
+                                            </button>
 
-                        <button
-                            onClick={() => handleDelete(student.id)}
-                            className="rounded-lg bg-red-500 px-3 py-1 text-xs font-semibold text-white hover:bg-red-600"
-                        >
-                            Hapus
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        ))
-    ) : (
-        <tr>
-            <td colSpan="9" className="px-4 py-6 text-center text-gray-500">
-                Data siswa belum tersedia.
-            </td>
-        </tr>
-    )}
-</tbody>
+                                            <button
+                                                onClick={() => handleDelete(student.id)}
+                                                className="rounded-lg bg-red-500 px-3 py-1 text-xs font-semibold text-white hover:bg-red-600"
+                                            >
+                                                Hapus
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="9" className="px-4 py-6 text-center text-gray-500">
+                                    Data siswa belum tersedia.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
                 </table>
             </div>
 
@@ -183,12 +184,12 @@ export default function Index({ students, filters }) {
                         onClick={() => link.url && router.get(link.url)}
                         className={`rounded-lg px-3 py-2 text-sm ${
                             link.active
-                                ? "bg-[#853953] text-white"
+                                ? "bg-cyan-500 text-white"
                                 : "bg-white text-gray-700"
                         } ${
                             !link.url
                                 ? "cursor-not-allowed opacity-50"
-                                : "hover:bg-gray-200"
+                                : "hover:bg-cyan-400"
                         }`}
                         dangerouslySetInnerHTML={{ __html: link.label }}
                     />

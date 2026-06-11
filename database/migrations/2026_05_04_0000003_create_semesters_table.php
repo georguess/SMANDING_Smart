@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('semester',20);
             $table->string('tahun_akademik',20);
             $table->timestamps();
+
+            $table->unique(['semester', 'tahun_akademik']);
         });
     }
 

@@ -8,6 +8,7 @@ use App\Models\Admin;
 use App\Models\Guru;
 use App\Models\Siswa;
 use App\Models\Kelas;
+use App\Models\Semester;
 use App\Models\RfidReader;
 use App\Models\RfidCard;
 use App\Models\Attendance;
@@ -53,11 +54,16 @@ class DatabaseSeeder extends Seeder
             'role' => 'siswa'
         ]);
 
-        $kelas = Kelas::create([
-            'nama_kelas' => 'XII 7',
-            'guru_id' => $guru->id,
-            'tahun_ajaran' => '2025/2026',
-        ]);
+        $semester = Semester::create([
+    'semester' => 'Ganjil',
+    'tahun_akademik' => '2025/2026',
+]);
+
+$kelas = Kelas::create([
+    'nama_kelas' => 'X7',
+    'guru_id' => $guru->id,
+    'tahun_ajaran' => '2025/2026',
+]);
 
         $siswa = Siswa::create([
             'user_id' => $userSiswa->id,

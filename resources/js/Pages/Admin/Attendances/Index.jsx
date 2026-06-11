@@ -3,7 +3,7 @@ import { Link } from "@inertiajs/react";
 
 export default function Index({ classes }) {
     return (
-        <div className="min-h-screen bg-gray-100 p-6">
+        <div className="min-h-screen bg-slate-100 rounded-xl p-6">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">
                     Kelola Absensi
@@ -25,7 +25,9 @@ export default function Index({ classes }) {
                             </h2>
 
                             <p className="mt-1 text-sm text-gray-500">
-                                Tahun Ajaran: {item.tahun_ajaran}
+                                Semester: {item.semester
+                                ? `${item.semester.semester} - ${item.semester.tahun_akademik}`
+                                : "-"}
                             </p>
 
                             <p className="mt-1 text-sm text-gray-500">
@@ -38,7 +40,7 @@ export default function Index({ classes }) {
 
                             <Link
                                 href={`/admin/attendances/classes/${item.id}`}
-                                className="mt-4 inline-block rounded-lg bg-[#853953] px-4 py-2 text-sm font-semibold text-white hover:bg-[#612D53]"
+                                className="mt-4 inline-block rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600"
                             >
                                 Lihat Absensi
                             </Link>
@@ -55,3 +57,6 @@ export default function Index({ classes }) {
         </div>
     );
 }
+
+Index.title = "Kelola Absensi";
+Index.subtitle = "Tambah, edit, hapus, dan reset absensi.";

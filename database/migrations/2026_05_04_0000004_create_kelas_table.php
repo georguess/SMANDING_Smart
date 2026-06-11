@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('nama_kelas',50);
             $table->foreignId('guru_id') ->constrained('gurus')->cascadeOnDelete();;
-            $table->string('tahun_ajaran',20);
+            $table->string('tahun_ajaran');
+            
+            $table->unique(['nama_kelas', 'tahun_ajaran']);
             $table->timestamps();
         });
     }

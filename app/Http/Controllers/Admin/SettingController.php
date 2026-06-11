@@ -14,7 +14,7 @@ class SettingController extends Controller
 {
     public function edit()
     {
-        return Inertia::render('Admin/Settings', [
+        return Inertia::render('Admin/Settings/Index', [
             'user' => auth()->user(),
         ]);
     }

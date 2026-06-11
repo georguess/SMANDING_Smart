@@ -1,14 +1,15 @@
 import React, { useState } from "react";
-import { Link, router } from "@inertiajs/react";
+import { Link, router, usePage } from "@inertiajs/react";
 
-export default function Index({ rfidReaders, filters }) {
+export default function Index({ semesters, filters }) {
     const [search, setSearch] = useState(filters.search || "");
+    const { flash } = usePage().props;
 
     const handleSearch = (e) => {
         e.preventDefault();
 
         router.get(
-            "/admin/rfid-readers",
+            "/admin/semesters",
             { search },
             {
                 preserveState: true,
@@ -18,21 +19,15 @@ export default function Index({ rfidReaders, filters }) {
     };
 
     const handleDelete = (id) => {
-        if (confirm("Yakin ingin menghapus RFID Reader ini?")) {
-            router.delete(`/admin/rfid-readers/${id}`);
+        if (confirm("Yakin ingin menghapus semester ini?")) {
+            router.delete(`/admin/semesters/${id}`);
         }
     };
 
-    const statusBadge = (status) => {
-        if (status === "active") {
-            return "bg-green-100 text-green-700";
+    const handleSetActive = (id) => {
+        if (confirm("Jadikan semester ini sebagai semester aktif?")) {
+            router.patch(`/admin/semesters/${id}/set-active`);
         }
-
-        if (status === "inactive") {
-            return "bg-red-100 text-red-700";
-        }
-
-        return "bg-yellow-100 text-yellow-700";
     };
 
     return (
@@ -40,18 +35,29 @@ export default function Index({ rfidReaders, filters }) {
             <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">
-                        Kelola RFID Reader
+                        Kelola Semester
                     </h1>
                     <p className="text-sm text-gray-500">
-                        Mengelola alat pembaca RFID yang digunakan untuk absensi.
+                        Atur semester dan tahun akademik yang sedang aktif.
                     </p>
                 </div>
+            {flash?.success && (
+                <div className="mb-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-600">
+                    {flash.success}
+                </div>
+            )}
+
+            {flash?.error && (
+                <div className="mb-4 rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600">
+                    {flash.error}
+                </div>
+            )}
 
                 <Link
-                    href="/admin/rfid-readers/create"
+                    href="/admin/semesters/create"
                     className="w-fit self-start rounded-lg bg-cyan-500 px-3 py-2 text-xs font-semibold text-white hover:bg-cyan-600 md:self-auto md:px-4 md:text-sm"
                 >
-                    + Tambah Reader
+                    + Tambah Semester
                 </Link>
             </div>
 
@@ -61,13 +67,13 @@ export default function Index({ rfidReaders, filters }) {
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Cari lokasi atau status reader..."
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-500 focus:outline-none"
+                        placeholder="Cari semester atau tahun akademik..."
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cyan-400 focus:outline-none"
                     />
 
                     <button
                         type="submit"
-                        className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-600"
+                        className="w-fit self-start rounded-lg bg-cyan-500 px-3 py-2 text-xs font-semibold text-white hover:bg-cyan-600 md:self-auto md:px-4 md:text-sm"
                     >
                         Cari
                     </button>
@@ -79,48 +85,64 @@ export default function Index({ rfidReaders, filters }) {
                     <thead className="bg-[#2C2C2C] text-white">
                         <tr>
                             <th className="px-4 py-3 text-left">No</th>
-                            <th className="px-4 py-3 text-left">Lokasi</th>
+                            <th className="px-4 py-3 text-left">Semester</th>
+                            <th className="px-4 py-3 text-left">Tahun Akademik</th>
                             <th className="px-4 py-3 text-left">Status</th>
-                            <th className="px-4 py-3 text-left">
-                                Jumlah Absensi
-                            </th>
+                            <th className="px-4 py-3 text-left">Jumlah Absensi</th>
                             <th className="px-4 py-3 text-left">Aksi</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        {rfidReaders.data.length > 0 ? (
-                            rfidReaders.data.map((reader, index) => (
+                        {semesters.data.length > 0 ? (
+                            semesters.data.map((item, index) => (
                                 <tr
-                                    key={reader.id}
+                                    key={item.id}
                                     className="border-b hover:bg-gray-50"
                                 >
                                     <td className="px-4 py-3">
-                                        {rfidReaders.from + index}
+                                        {semesters.from + index}
                                     </td>
 
                                     <td className="px-4 py-3 font-medium">
-                                        {reader.lokasi}
+                                        {item.semester}
                                     </td>
 
                                     <td className="px-4 py-3">
-                                        <span
-                                            className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadge(
-                                                reader.status
-                                            )}`}
-                                        >
-                                            {reader.status}
-                                        </span>
+                                        {item.tahun_akademik}
                                     </td>
 
                                     <td className="px-4 py-3">
-                                        {reader.attendances_count}
+                                        {item.is_active ? (
+                                            <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                                                Aktif
+                                            </span>
+                                        ) : (
+                                            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+                                                Nonaktif
+                                            </span>
+                                        )}
                                     </td>
 
                                     <td className="px-4 py-3">
-                                        <div className="flex flex-wrap gap-2">
+                                        {item.attendances_count}
+                                    </td>
+
+                                    <td className="px-4 py-3">
+                                        <div className="flex flex-wrap gap-2 ">
+                                            {!item.is_active && (
+                                                <button
+                                                    onClick={() =>
+                                                        handleSetActive(item.id)
+                                                    }
+                                                    className="rounded-lg bg-green-600 px-3 py-1 text-xs font-semibold text-white hover:bg-green-700"
+                                                >
+                                                    Set Aktif
+                                                </button>
+                                            )}
+
                                             <Link
-                                                href={`/admin/rfid-readers/${reader.id}/edit`}
+                                                href={`/admin/semesters/${item.id}/edit`}
                                                 className="rounded-lg bg-blue-500 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-600"
                                             >
                                                 Edit
@@ -128,7 +150,7 @@ export default function Index({ rfidReaders, filters }) {
 
                                             <button
                                                 onClick={() =>
-                                                    handleDelete(reader.id)
+                                                    handleDelete(item.id)
                                                 }
                                                 className="rounded-lg bg-red-500 px-3 py-1 text-xs font-semibold text-white hover:bg-red-600"
                                             >
@@ -141,10 +163,10 @@ export default function Index({ rfidReaders, filters }) {
                         ) : (
                             <tr>
                                 <td
-                                    colSpan="5"
+                                    colSpan="6"
                                     className="px-4 py-6 text-center text-gray-500"
                                 >
-                                    Data RFID Reader belum tersedia.
+                                    Data semester belum tersedia.
                                 </td>
                             </tr>
                         )}
@@ -153,7 +175,7 @@ export default function Index({ rfidReaders, filters }) {
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
-                {rfidReaders.links.map((link, index) => (
+                {semesters.links.map((link, index) => (
                     <button
                         key={index}
                         disabled={!link.url}
@@ -165,7 +187,7 @@ export default function Index({ rfidReaders, filters }) {
                         } ${
                             !link.url
                                 ? "cursor-not-allowed opacity-50"
-                                : "hover:bg-cyan-600"
+                                : "hover:bg-gray-200"
                         }`}
                         dangerouslySetInnerHTML={{ __html: link.label }}
                     />
@@ -174,6 +196,5 @@ export default function Index({ rfidReaders, filters }) {
         </div>
     );
 }
-
-Index.title = "Data Lokasi RFID";
-Index.subtitle = "Tambah, edit, hapus, dan reset lokasi RFID.";
+Index.title = "Data Semester";
+Index.subtitle = "Tambah, edit, hapus, dan reset data semester.";
