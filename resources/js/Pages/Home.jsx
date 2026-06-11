@@ -1,5 +1,21 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "@inertiajs/react";
+import {
+    RiLoginBoxLine,
+    RiBankCardLine,
+    RiCameraLine,
+    RiDashboard3Line,
+    RiFileList3Line,
+    RiCodeSSlashLine,
+    RiServerLine,
+    RiDatabase2Line,
+    RiBrushLine,
+    RiRadio2Line,
+    RiGroupLine,
+    RiTeamLine,
+    RiSchoolLine,
+    RiLayout4Line,
+} from "@remixicon/react";
 import {
     ResponsiveContainer,
     LineChart,
@@ -12,26 +28,49 @@ import {
 } from "recharts";
 
 export default function Home({ stats, activeSemester, weeklyAttendance }) {
+    const [activeSection, setActiveSection] = useState("home");
+
+    const safeStats = stats ?? {
+        totalSiswa: 0,
+        totalGuru: 0,
+        totalKelas: 0,
+    };
+
+    const safeWeeklyAttendance = weeklyAttendance ?? [];
+
+    const navItems = [
+        { id: "home", label: "Home" },
+        { id: "fitur", label: "Fitur" },
+        { id: "grafik", label: "Grafik" },
+        { id: "arsitektur", label: "Arsitektur" },
+        { id: "faq", label: "FAQ" },
+        { id: "developer", label: "Developer" },
+    ];
+
     const features = [
         {
             title: "Absensi RFID",
             desc: "Siswa melakukan absensi menggunakan kartu RFID yang terhubung dengan sistem.",
-            icon: "💳",
+            icon: RiBankCardLine,
+            iconBox: "bg-cyan-100 text-cyan-700",
         },
         {
             title: "Bukti Foto",
             desc: "Setiap absensi dapat dilengkapi bukti foto untuk mencegah titip kartu.",
-            icon: "📸",
+            icon: RiCameraLine,
+            iconBox: "bg-blue-100 text-blue-700",
         },
         {
             title: "Dashboard Real-Time",
             desc: "Admin dan guru dapat memantau data kehadiran siswa dengan cepat.",
-            icon: "📊",
+            icon: RiDashboard3Line,
+            iconBox: "bg-emerald-100 text-emerald-700",
         },
         {
             title: "Laporan Absensi",
             desc: "Data absensi dapat difilter berdasarkan kelas, semester, bulan, dan status.",
-            icon: "📄",
+            icon: RiFileList3Line,
+            iconBox: "bg-amber-100 text-amber-700",
         },
     ];
 
@@ -39,22 +78,58 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
         {
             name: "React",
             desc: "Membangun tampilan frontend yang interaktif.",
-            icon: "⚛️",
+            icon: RiCodeSSlashLine,
+            iconBox: "bg-cyan-100 text-cyan-700",
         },
         {
             name: "Laravel",
             desc: "Mengelola backend, autentikasi, route, dan API.",
-            icon: "🧱",
+            icon: RiServerLine,
+            iconBox: "bg-blue-100 text-blue-700",
         },
         {
             name: "PostgreSQL",
             desc: "Menyimpan data siswa, guru, kelas, RFID, dan absensi.",
-            icon: "🐘",
+            icon: RiDatabase2Line,
+            iconBox: "bg-emerald-100 text-emerald-700",
         },
         {
             name: "Tailwind CSS",
             desc: "Membuat tampilan modern, responsif, dan konsisten.",
-            icon: "🎨",
+            icon: RiBrushLine,
+            iconBox: "bg-amber-100 text-amber-700",
+        },
+    ];
+
+    const leaderDeveloper = {
+        name: "Rizkima Akbar Setiawan, S.T., M.T.",
+        role: "Leader Developer",
+        image: "/images/developers/leader.jpg",
+        icon: RiTeamLine,
+        instagram: "https://www.instagram.com/akbartunggal15",
+    };
+
+    const developers = [
+        {
+            name: "Angga Saputra",
+            role: "Fullstack Developer Role Admin",
+            image: "/images/developers/dev-1.jpg",
+            icon: RiLayout4Line,
+            instagram: "https://www.instagram.com/anggasaputraa31",
+        },
+        {
+            name: "Akhmad Faishal Kharisma",
+            role: "Fullstack Developer Role Guru",
+            image: "/images/developers/dev-2.jpg",
+            icon: RiCodeSSlashLine,
+            instagram: "https://www.instagram.com/akhmadfaishall_",
+        },
+        {
+            name: "Muhammad Fadhel Saputra",
+            role: "Fullstack Developer Role Siswa",
+            image: "/images/developers/dev-3.jpg",
+            icon: RiDatabase2Line,
+            instagram: "https://www.instagram.com/fdhelsaputra",
         },
     ];
 
@@ -73,7 +148,7 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
         },
     ];
 
-    const chartData = weeklyAttendance.map((item) => ({
+    const chartData = safeWeeklyAttendance.map((item) => ({
         name: item.label,
         day: item.day,
         hadir: item.hadir,
@@ -88,9 +163,9 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
             const data = payload[0].payload;
 
             return (
-                <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-lg">
+                <div className="rounded-2xl border border-cyan-100 bg-white p-4 shadow-lg">
                     <p className="font-bold text-slate-800">{label}</p>
-                    <p className="text-sm text-sky-600">
+                    <p className="text-sm font-semibold text-cyan-700">
                         Kehadiran: {data.percentage}%
                     </p>
 
@@ -116,18 +191,47 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
         const targetPosition =
             section.getBoundingClientRect().top + window.scrollY - navbarHeight;
 
+        setActiveSection(id);
+
         window.scrollTo({
             top: targetPosition,
             behavior: "smooth",
         });
     };
 
+    useEffect(() => {
+        const handleScroll = () => {
+            const navbarOffset = 140;
+            const currentPosition = window.scrollY + navbarOffset;
+
+            let currentSection = "home";
+
+            navItems.forEach((item) => {
+                const section = document.getElementById(item.id);
+
+                if (section && section.offsetTop <= currentPosition) {
+                    currentSection = item.id;
+                }
+            });
+
+            setActiveSection(currentSection);
+        };
+
+        handleScroll();
+
+        window.addEventListener("scroll", handleScroll);
+
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+        };
+    }, []);
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-sky-50 via-cyan-50 to-blue-100 text-slate-800">
-            <nav className="sticky top-0 z-50 border-b border-white/60 bg-white/75 backdrop-blur-xl">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50 to-slate-100 text-slate-800">
+            <nav className="sticky top-0 z-50 border-b border-white/60 bg-white/80 backdrop-blur-xl">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white p-2 shadow-sm ring-1 ring-sky-100">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white p-2 shadow-sm ring-1 ring-cyan-100">
                             <img
                                 src="/images/logo-smanding.png"
                                 alt="Logo SMANDING"
@@ -136,7 +240,7 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                         </div>
 
                         <div>
-                            <h1 className="text-2xl font-extrabold text-sky-700">
+                            <h1 className="text-2xl font-extrabold text-cyan-700">
                                 SMANDING
                             </h1>
                             <p className="text-xs font-medium text-slate-500">
@@ -145,79 +249,70 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                         </div>
                     </div>
 
-                    <div className="hidden items-center gap-6 text-sm font-semibold text-slate-600 md:flex">
-                        <button
-                            type="button"
-                            onClick={() => scrollToSection("home")}
-                            className="transition hover:text-sky-600"
-                        >
-                            Home
-                        </button>
+                    <div className="hidden items-center gap-8 text-sm font-semibold md:flex">
+                        {navItems.map((item) => {
+                            const isActive = activeSection === item.id;
 
-                        <button
-                            type="button"
-                            onClick={() => scrollToSection("fitur")}
-                            className="transition hover:text-sky-600"
-                        >
-                            Fitur
-                        </button>
+                            return (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    onClick={() => scrollToSection(item.id)}
+                                    className={`relative pb-2 transition-all duration-300 ${
+                                        isActive
+                                            ? "text-cyan-700"
+                                            : "text-slate-600 hover:text-cyan-700"
+                                    }`}
+                                >
+                                    {item.label}
 
-                        <button
-                            type="button"
-                            onClick={() => scrollToSection("grafik")}
-                            className="transition hover:text-sky-600"
-                        >
-                            Grafik
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() => scrollToSection("arsitektur")}
-                            className="transition hover:text-sky-600"
-                        >
-                            Arsitektur
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() => scrollToSection("faq")}
-                            className="transition hover:text-sky-600"
-                        >
-                            FAQ
-                        </button>
+                                    <span
+                                        className={`absolute bottom-0 left-1/2 h-[3px] -translate-x-1/2 rounded-full bg-cyan-700 transition-all duration-300 ${
+                                            isActive ? "w-10 opacity-100" : "w-0 opacity-0"
+                                        }`}
+                                    />
+                                </button>
+                            );
+                        })}
                     </div>
 
                     <Link
                         href="/login"
-                        className="rounded-2xl bg-sky-500 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-sky-600"
+                        className="inline-flex items-center gap-2 rounded-2xl bg-cyan-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-cyan-800"
                     >
+                        <RiLoginBoxLine size={18} />
                         Login
                     </Link>
                 </div>
             </nav>
 
-            <section id="home" className="mx-auto grid min-h-[calc(100vh-88px)] max-w-7xl grid-cols-1 items-center gap-10 px-6 py-14 lg:grid-cols-2">
+            <section
+                id="home"
+                className="mx-auto grid min-h-[calc(100vh-88px)] max-w-7xl grid-cols-1 items-center gap-10 px-6 py-14 lg:grid-cols-2"
+            >
                 <div>
-                    <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-sm font-bold text-sky-700 shadow-sm">
-                        <span>✨</span>
+                    <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-sm font-bold text-cyan-700 shadow-sm">
+                        <RiRadio2Line size={18} />
                         Sistem Absensi Sekolah Digital
                     </div>
 
                     <h2 className="text-5xl font-extrabold leading-tight text-slate-900 md:text-6xl">
                         Absensi sekolah jadi lebih{" "}
-                        <span className="bg-gradient-to-r from-sky-500 via-cyan-500 to-blue-700 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-cyan-600 via-cyan-700 to-cyan-900 bg-clip-text text-transparent">
                             cepat dan rapi.
                         </span>
                     </h2>
 
                     <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-600">
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate, consequuntur!
+                        Sistem Presensi Digital SMANDING membantu proses absensi
+                        siswa menjadi lebih cepat, rapi, dan mudah dipantau
+                        melalui dashboard berbasis web.
                     </p>
 
                     <div className="mt-8 flex flex-wrap gap-3">
                         <Link
                             href="/login"
-                            className="rounded-2xl bg-sky-500 px-6 py-3 text-sm font-bold text-white shadow-md transition hover:bg-sky-600"
+                            className="rounded-2xl bg-cyan-700 px-6 py-3 text-sm font-bold text-white shadow-md transition hover:bg-cyan-800"
                         >
                             Masuk ke Sistem
                         </Link>
@@ -225,7 +320,7 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                         <button
                             type="button"
                             onClick={() => scrollToSection("fitur")}
-                            className="rounded-2xl border border-sky-200 bg-white/80 px-6 py-3 text-sm font-bold text-sky-700 shadow-sm transition hover:bg-sky-50"
+                            className="rounded-2xl border border-cyan-200 bg-white/80 px-6 py-3 text-sm font-bold text-cyan-700 shadow-sm transition hover:bg-cyan-50"
                         >
                             Lihat Fitur
                         </button>
@@ -233,10 +328,10 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                 </div>
 
                 <div className="relative">
-                    <div className="absolute -left-6 -top-6 h-40 w-40 rounded-full bg-amber-300/40 blur-3xl" />
-                    <div className="absolute -bottom-6 -right-6 h-52 w-52 rounded-full bg-sky-400/40 blur-3xl" />
+                    <div className="absolute -left-6 -top-6 h-40 w-40 rounded-full bg-amber-300/30 blur-3xl" />
+                    <div className="absolute -bottom-6 -right-6 h-52 w-52 rounded-full bg-cyan-400/30 blur-3xl" />
 
-                    <div className="relative rounded-[2rem] border border-white/70 bg-white/75 p-6 shadow-xl backdrop-blur">
+                    <div className="relative rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-xl backdrop-blur">
                         <div className="mb-5 flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-semibold text-slate-500">
@@ -249,24 +344,30 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                                 </h3>
                             </div>
 
-                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-3xl shadow-md">
-                                📡
+                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-700 to-cyan-900 text-white shadow-md">
+                                <RiRadio2Line size={34} />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-3 gap-4">
-                            <div className="rounded-3xl bg-sky-50 p-4 text-center">
-                                <p className="text-3xl font-extrabold text-sky-600">
-                                    {stats.totalSiswa}
+                            <div className="rounded-3xl bg-cyan-50 p-4 text-center">
+                                <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700">
+                                    <RiGroupLine size={22} />
+                                </div>
+                                <p className="text-3xl font-extrabold text-cyan-700">
+                                    {safeStats.totalSiswa}
                                 </p>
                                 <p className="mt-1 text-xs font-bold text-slate-500">
                                     Siswa
                                 </p>
                             </div>
 
-                            <div className="rounded-3xl bg-cyan-50 p-4 text-center">
-                                <p className="text-3xl font-extrabold text-cyan-600">
-                                    {stats.totalGuru}
+                            <div className="rounded-3xl bg-blue-50 p-4 text-center">
+                                <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                                    <RiTeamLine size={22} />
+                                </div>
+                                <p className="text-3xl font-extrabold text-blue-700">
+                                    {safeStats.totalGuru}
                                 </p>
                                 <p className="mt-1 text-xs font-bold text-slate-500">
                                     Guru
@@ -274,8 +375,11 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                             </div>
 
                             <div className="rounded-3xl bg-amber-50 p-4 text-center">
-                                <p className="text-3xl font-extrabold text-amber-500">
-                                    {stats.totalKelas}
+                                <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                                    <RiSchoolLine size={22} />
+                                </div>
+                                <p className="text-3xl font-extrabold text-amber-600">
+                                    {safeStats.totalKelas}
                                 </p>
                                 <p className="mt-1 text-xs font-bold text-slate-500">
                                     Kelas
@@ -283,7 +387,7 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                             </div>
                         </div>
 
-                        <div className="mt-5 rounded-3xl bg-gradient-to-r from-sky-500 via-cyan-500 to-blue-700 p-5 text-white">
+                        <div className="mt-5 rounded-3xl bg-gradient-to-r from-cyan-700 via-cyan-800 to-cyan-900 p-5 text-white">
                             <p className="text-sm text-white/80">
                                 Edukasi Sistem
                             </p>
@@ -300,15 +404,12 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                 </div>
             </section>
 
-            <section
-                id="fitur"
-                className="mx-auto max-w-7xl px-6 pb-24 pt-10"
-            >
+            <section id="fitur" className="mx-auto max-w-7xl px-6 pb-24 pt-10">
                 <div className="mb-8 text-center">
-                    <h2 className="text-3xl font-extrabold text-slate-900">
+                    <h2 className="text-3xl font-extrabold text-cyan-700 md:text-4xl">
                         Fitur Utama SMANDING
                     </h2>
-                    <p className="mt-2 text-slate-500">
+                    <p className="mt-3 text-slate-500">
                         Dibuat untuk membantu sekolah mengelola absensi dengan
                         lebih mudah.
                     </p>
@@ -318,10 +419,15 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                     {features.map((item) => (
                         <div
                             key={item.title}
-                            className="rounded-3xl border border-white/70 bg-white/75 p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-md"
+                            className="rounded-3xl border border-white/70 bg-white/80 p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-md"
                         >
-                            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-2xl shadow-sm">
-                                {item.icon}
+                            <div
+                                className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl shadow-sm ${item.iconBox}`}
+                            >
+                                {(() => {
+                                    const Icon = item.icon;
+                                    return <Icon size={28} />;
+                                })()}
                             </div>
 
                             <h3 className="text-lg font-extrabold text-slate-800">
@@ -336,14 +442,11 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                 </div>
             </section>
 
-            <section
-                id="grafik"
-                className="mx-auto max-w-7xl px-6 pb-24 pt-10"
-            >
-                <div className="rounded-3xl border border-white/70 bg-white/75 p-8 shadow-sm backdrop-blur">
+            <section id="grafik" className="mx-auto max-w-7xl px-6 pb-24 pt-10">
+                <div className="rounded-3xl border border-white/70 bg-white/80 p-8 shadow-sm backdrop-blur">
                     <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                         <div>
-                            <h2 className="text-2xl font-extrabold text-slate-800">
+                            <h2 className="text-2xl font-extrabold text-cyan-700 md:text-3xl">
                                 Grafik Kehadiran 7 Hari Terakhir
                             </h2>
                             <p className="text-sm text-slate-500">
@@ -352,7 +455,7 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                             </p>
                         </div>
 
-                        <div className="rounded-2xl bg-sky-50 px-4 py-2 text-sm font-bold text-sky-700">
+                        <div className="rounded-2xl bg-cyan-50 px-4 py-2 text-sm font-bold text-cyan-700">
                             Weekly Attendance
                         </div>
                     </div>
@@ -396,18 +499,18 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                                     type="monotone"
                                     dataKey="percentage"
                                     name="Persentase Hadir"
-                                    stroke="#0284C7"
+                                    stroke="#0E7490"
                                     strokeWidth={4}
                                     dot={{
                                         r: 5,
                                         fill: "#FACC15",
-                                        stroke: "#0284C7",
+                                        stroke: "#0E7490",
                                         strokeWidth: 2,
                                     }}
                                     activeDot={{
                                         r: 8,
                                         fill: "#FACC15",
-                                        stroke: "#0284C7",
+                                        stroke: "#0E7490",
                                         strokeWidth: 3,
                                     }}
                                 />
@@ -416,16 +519,16 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                     </div>
 
                     <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-4">
-                        {weeklyAttendance.map((item) => (
+                        {safeWeeklyAttendance.map((item) => (
                             <div
                                 key={item.date}
-                                className="rounded-2xl bg-sky-50 p-4"
+                                className="rounded-2xl bg-cyan-50 p-4"
                             >
                                 <p className="text-sm font-bold text-slate-700">
                                     {item.day}, {item.label}
                                 </p>
 
-                                <p className="mt-1 text-2xl font-extrabold text-sky-600">
+                                <p className="mt-1 text-2xl font-extrabold text-cyan-700">
                                     {item.percentage}%
                                 </p>
 
@@ -433,7 +536,7 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                                     <span className="rounded-full bg-emerald-100 px-2 py-1 text-emerald-700">
                                         H {item.hadir}
                                     </span>
-                                    <span className="rounded-full bg-sky-100 px-2 py-1 text-sky-700">
+                                    <span className="rounded-full bg-cyan-100 px-2 py-1 text-cyan-700">
                                         I {item.izin}
                                     </span>
                                     <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-700">
@@ -451,15 +554,15 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
 
             <section
                 id="arsitektur"
-                className="mx-auto max-w-7xl px-6 pb-24 pt-10"
+                className="mx-auto max-w-7xl px-6 pb-16 pt-10"
             >
                 <div className="mb-8 text-center">
-                    <h2 className="text-3xl font-extrabold text-slate-900">
+                    <h2 className="text-3xl font-extrabold text-cyan-700 md:text-4xl">
                         Arsitektur Teknologi
                     </h2>
-                    <p className="mt-2 text-slate-500">
-                        Sistem Absensi dibangun menggunakan teknologi modern untuk web
-                        fullstack.
+                    <p className="mt-3 text-slate-500">
+                        Sistem Absensi dibangun menggunakan teknologi modern
+                        untuk web fullstack.
                     </p>
                 </div>
 
@@ -467,10 +570,15 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                     {architecture.map((item) => (
                         <div
                             key={item.name}
-                            className="rounded-3xl bg-white/75 p-6 text-center shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-md"
+                            className="rounded-3xl bg-white/80 p-6 text-center shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-md"
                         >
-                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-100 text-3xl">
-                                {item.icon}
+                            <div
+                                className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl ${item.iconBox}`}
+                            >
+                                {(() => {
+                                    const Icon = item.icon;
+                                    return <Icon size={30} />;
+                                })()}
                             </div>
 
                             <h3 className="text-lg font-extrabold text-slate-800">
@@ -485,18 +593,18 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                 </div>
             </section>
 
-            <section id="faq" className="mx-auto min-h-[calc(100vh-88px)] max-w-7xl grid-cols-1 items-center gap-20 px-6 py-20 lg:grid-cols-2 ">
+            <section id="faq" className="mx-auto max-w-7xl px-6 pb-16 pt-8">
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                     <div>
-                        <h2 className="text-3xl font-extrabold text-slate-900">
+                        <h2 className="text-3xl font-extrabold uppercase tracking-[0.2em] text-cyan-700 md:text-4xl">
                             FAQ
                         </h2>
                         <p className="mt-3 max-w-lg text-slate-500">
-                            Pertanyaan umum seputar sistem absensi di Sma N 1 Gadingrejo dan
-                            cara penggunaannya.
+                            Pertanyaan umum seputar sistem absensi di SMA N 1
+                            Gadingrejo dan cara penggunaannya.
                         </p>
 
-                        <div className="mt-6 rounded-3xl bg-gradient-to-r from-sky-500 to-blue-700 p-6 text-white shadow-lg">
+                        <div className="mt-6 rounded-3xl bg-gradient-to-r from-cyan-700 to-cyan-900 p-6 text-white shadow-lg">
                             <h3 className="text-xl font-extrabold">
                                 Sistem Absensi untuk Sekolah
                             </h3>
@@ -512,7 +620,7 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                         {faqs.map((item) => (
                             <div
                                 key={item.q}
-                                className="rounded-3xl bg-white/75 p-5 shadow-sm backdrop-blur"
+                                className="rounded-3xl bg-white/80 p-5 shadow-sm backdrop-blur"
                             >
                                 <h3 className="font-extrabold text-slate-800">
                                     {item.q}
@@ -526,26 +634,146 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                 </div>
             </section>
 
-            <footer className="border-t border-white/60 bg-white/70 backdrop-blur mt-20">
-                <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-8 md:flex-row md:items-center md:justify-between">
-                    <div className="flex items-center gap-3">
+            <section id="developer" className="mx-auto max-w-7xl px-6 pb-24 pt-4">
+                <div className="bg-transparent">
+                    <div className="mb-10 text-center">
+                        <h2 className="text-3xl font-extrabold uppercase tracking-[0.2em] text-cyan-700 md:text-5xl">
+                            Developer
+                        </h2>
+
+                        <p className="mx-auto mt-4 max-w-3xl text-base leading-relaxed text-slate-600 md:text-lg">
+                            Sistem Presensi Digital SMANDING dikembangkan untuk
+                            mendukung proses absensi siswa secara cepat, modern,
+                            dan terintegrasi.
+                        </p>
+                    </div>
+
+                    <div className="mb-10 flex justify-center">
+                        {(() => {
+                            const Icon = leaderDeveloper.icon;
+
+                            return (
+                                <a
+                                    href={leaderDeveloper.instagram}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group relative block w-full max-w-md cursor-pointer overflow-hidden rounded-[2rem] border border-emerald-100 bg-white/85 p-[2px] shadow-xl shadow-emerald-100/70 transition duration-300 hover:-translate-y-3 hover:shadow-2xl hover:shadow-emerald-200/80"
+                                >
+                                    <div className="relative h-full overflow-hidden rounded-[2rem] bg-gradient-to-br from-white via-emerald-50/60 to-cyan-50/70 p-8 text-center backdrop-blur-xl">
+                                        <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-emerald-500 via-cyan-600 to-cyan-800" />
+
+                                        <div className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-emerald-200/30 blur-3xl" />
+                                        <div className="absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-cyan-300/25 blur-3xl" />
+
+                                        <div className="relative z-10 mb-6 flex justify-center">
+                                            <div className="rounded-full bg-gradient-to-br from-emerald-500 via-cyan-600 to-cyan-800 p-1 shadow-xl transition duration-300 group-hover:scale-105">
+                                                <div className="rounded-full bg-white p-1.5">
+                                                    <img
+                                                        src={leaderDeveloper.image}
+                                                        alt={leaderDeveloper.name}
+                                                        className="h-32 w-32 rounded-full object-cover shadow-md"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="relative z-10 mb-5 flex justify-center">
+                                            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-xs font-extrabold text-emerald-700 shadow-sm">
+                                                <Icon size={16} />
+                                                Leader Developer
+                                            </div>
+                                        </div>
+
+                                        <h3 className="relative z-10 whitespace-nowrap text-[16px] font-extrabold leading-snug text-slate-900 sm:text-[18px] md:text-[20px]">
+                                            {leaderDeveloper.name}
+                                        </h3>
+
+                                        <div className="relative z-10 mt-7 flex justify-center">
+                                            <div className="h-1.5 w-28 rounded-full bg-gradient-to-r from-emerald-500 via-cyan-600 to-cyan-800" />
+                                        </div>
+                                    </div>
+                                </a>
+                            );
+                        })()}
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+                        {developers.map((developer, index) => {
+                            const Icon = developer.icon;
+
+                            return (
+                                <a
+                                    key={developer.name}
+                                    href={developer.instagram}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group relative block cursor-pointer overflow-hidden rounded-[2rem] border border-emerald-100 bg-white/85 p-[2px] shadow-xl shadow-emerald-100/70 transition duration-300 hover:-translate-y-3 hover:shadow-2xl hover:shadow-emerald-200/80"
+                                >
+                                    <div className="relative h-full overflow-hidden rounded-[2rem] bg-gradient-to-br from-white via-emerald-50/60 to-cyan-50/70 p-8 text-center backdrop-blur-xl">
+                                        <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-emerald-500 via-cyan-600 to-cyan-800" />
+
+                                        <div className="absolute -right-16 -top-16 h-44 w-44 rounded-full bg-emerald-200/30 blur-3xl" />
+                                        <div className="absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-cyan-300/25 blur-3xl" />
+
+                                        <div className="relative z-10 mb-6 flex justify-center">
+                                            <div className="rounded-full bg-gradient-to-br from-emerald-500 via-cyan-600 to-cyan-800 p-1 shadow-xl transition duration-300 group-hover:scale-105">
+                                                <div className="rounded-full bg-white p-1.5">
+                                                    <img
+                                                        src={developer.image}
+                                                        alt={developer.name}
+                                                        className="h-32 w-32 rounded-full object-cover shadow-md"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="relative z-10 mb-5 flex justify-center">
+                                            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-xs font-extrabold text-emerald-700 shadow-sm">
+                                                <Icon size={16} />
+                                                Developer {index + 1}
+                                            </div>
+                                        </div>
+
+                                        <h3 className="relative z-10 whitespace-nowrap text-[20px] font-extrabold leading-snug text-slate-900">
+                                            {developer.name}
+                                        </h3>
+
+                                        <p className="relative z-10 mt-3 text-base font-bold text-emerald-700">
+                                            {developer.role}
+                                        </p>
+
+                                        <div className="relative z-10 mt-7 flex justify-center">
+                                            <div className="h-1.5 w-28 rounded-full bg-gradient-to-r from-emerald-500 via-cyan-600 to-cyan-800" />
+                                        </div>
+                                    </div>
+                                </a>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
+
+            <footer className="border-t border-white/60 bg-white/70 backdrop-blur">
+                <div className="mx-auto flex max-w-7xl flex-row items-center justify-between gap-3 px-4 py-6 sm:px-6 md:py-8">
+                    <div className="flex min-w-0 items-center gap-3">
                         <img
                             src="/images/logo-smanding.png"
                             alt="Logo SMANDING"
-                            className="h-12 w-12 object-contain"
+                            className="h-10 w-10 shrink-0 object-contain sm:h-12 sm:w-12"
                         />
-                        <div>
-                            <h2 className="font-extrabold text-sky-700">
+
+                        <div className="min-w-0">
+                            <h2 className="text-sm font-extrabold text-cyan-700 sm:text-base">
                                 SMANDING
                             </h2>
-                            <p className="text-sm text-slate-500">
+                            <p className="truncate text-xs text-slate-500 sm:text-sm">
                                 SMA N 1 GADINGREJO
                             </p>
                         </div>
                     </div>
 
-                    <p className="text-sm text-slate-500">
-                        © 2026 SMA N 1 GADINGREJO.
+                    <p className="shrink-0 text-right text-[11px] text-slate-500 sm:text-sm">
+                        © 2026 SMA N 1 GADINGREJO
                     </p>
                 </div>
             </footer>

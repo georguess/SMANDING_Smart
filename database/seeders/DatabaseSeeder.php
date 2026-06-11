@@ -84,6 +84,10 @@ $kelas = Kelas::create([
             'uid_card' => 'A1B2C3D4E5'
         ]);
 
+        $this->call([
+        WaliKelasSeeder::class,
+    ]);
+
         // 6. Buat Data Simulasi Kehadiran (Presensi)
         Attendance::create([
             'user_id' => $userSiswa->id, // User yang absen (Andi)

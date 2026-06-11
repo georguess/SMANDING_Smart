@@ -17,6 +17,10 @@ use App\Http\Controllers\LiveAttendanceController;
 use Illuminate\Foundation\Application;
 use App\Http\Controllers\Admin\SemesterController;
 use Inertia\Inertia;
+use App\Http\Controllers\Guru\DashboardController as GuruDashboardController;
+use App\Http\Controllers\Guru\StudentController as GuruStudentController;
+use App\Http\Controllers\Guru\AttendanceController as GuruAttendanceController;
+use App\Http\Controllers\Guru\SettingController as GuruSettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -69,14 +73,37 @@ Route::middleware(['auth', 'role:guru'])
         })->name('dashboard');
     });
 
-Route::middleware(['auth', 'role:siswa'])
-    ->prefix('siswa')
-    ->name('siswa.')
+Route::middleware(['auth', 'role:guru'])
+    ->prefix('guru')
+    ->name('guru.')
     ->group(function () {
-        Route::get('/dashboard', function () {
-            return Inertia::render('Siswa/Dashboard');
-        })->name('dashboard');
-    });
+        Route::get('/dashboard', [GuruDashboardController::class, 'index'])
+            ->name('dashboard');
+
+        Route::get('/students', [GuruStudentController::class, 'index'])
+            ->name('students.index');
+
+        Route::get('/attendances', [GuruAttendanceController::class, 'index'])
+            ->name('attendances.index');
+
+        Route::get('/attendances/classes/{kelas}', [GuruAttendanceController::class, 'classAttendance'])
+            ->name('attendances.classes');
+        
+        Route::get('/attendances/classes/{kelas}/export-csv', [GuruAttendanceController::class, 'exportCsv'])
+            ->name('attendances.exportCsv');
+
+        Route::patch('/attendances/{attendance}/status', [GuruAttendanceController::class, 'updateStatus'])
+            ->name('attendances.updateStatus');
+
+        Route::get('/settings', [GuruSettingController::class, 'index'])
+            ->name('settings.index');
+
+        Route::post('/settings/photo', [GuruSettingController::class, 'updatePhoto'])
+            ->name('settings.photo');
+
+        Route::put('/settings/password', [GuruSettingController::class, 'updatePassword'])
+            ->name('settings.password');
+            });
 
 
 Route::middleware(['auth', 'role:admin'])
