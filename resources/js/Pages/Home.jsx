@@ -29,6 +29,7 @@ import {
 
 export default function Home({ stats, activeSemester, weeklyAttendance }) {
     const [activeSection, setActiveSection] = useState("home");
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const safeStats = stats ?? {
         totalSiswa: 0,
@@ -148,7 +149,11 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
         },
     ];
 
-    const chartData = safeWeeklyAttendance.map((item) => ({
+    const orderedWeeklyAttendance = [...safeWeeklyAttendance].sort((a, b) => {
+        return new Date(a.date) - new Date(b.date);
+    });
+
+    const chartData = orderedWeeklyAttendance.map((item) => ({
         name: item.label,
         day: item.day,
         hadir: item.hadir,
@@ -199,6 +204,11 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
         });
     };
 
+    const handleNavClick = (id) => {
+        scrollToSection(id);
+        setMobileMenuOpen(false);
+    };
+
     useEffect(() => {
         const handleScroll = () => {
             const navbarOffset = 140;
@@ -228,10 +238,10 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50 to-slate-100 text-slate-800">
-            <nav className="sticky top-0 z-50 border-b border-white/60 bg-white/80 backdrop-blur-xl">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+            <nav className="sticky top-0 z-50 border-b border-white/60 bg-white/85 backdrop-blur-xl">
+                <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white p-2 shadow-sm ring-1 ring-cyan-100">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white p-2 shadow-sm ring-1 ring-cyan-100 sm:h-14 sm:w-14">
                             <img
                                 src="/images/logo-smanding.png"
                                 alt="Logo SMANDING"
@@ -240,15 +250,16 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                         </div>
 
                         <div>
-                            <h1 className="text-2xl font-extrabold text-cyan-700">
+                            <h1 className="text-lg font-extrabold text-cyan-700 sm:text-2xl">
                                 SMANDING
                             </h1>
-                            <p className="text-xs font-medium text-slate-500">
+                            <p className="text-[10px] font-medium text-slate-500 sm:text-xs">
                                 SMA N 1 GADINGREJO
                             </p>
                         </div>
                     </div>
 
+                    {/* Menu Desktop */}
                     <div className="hidden items-center gap-8 text-sm font-semibold md:flex">
                         {navItems.map((item) => {
                             const isActive = activeSection === item.id;
@@ -276,14 +287,125 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                         })}
                     </div>
 
-                    <Link
-                        href="/login"
-                        className="inline-flex items-center gap-2 rounded-2xl bg-cyan-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-cyan-800"
-                    >
-                        <RiLoginBoxLine size={18} />
-                        Login
-                    </Link>
+                    <div className="flex items-center gap-3">
+                        <Link
+                            href="/login"
+                            className="hidden items-center gap-2 rounded-2xl bg-cyan-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-cyan-800 md:inline-flex"
+                        >
+                            <RiLoginBoxLine size={18} />
+                            Login
+                        </Link>
+
+                        {/* Tombol Hamburger Mobile */}
+                        <button
+                            type="button"
+                            onClick={() => setMobileMenuOpen(true)}
+                            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-100 bg-white text-cyan-700 shadow-sm transition hover:bg-cyan-50 md:hidden"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-6 w-6"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M4 6h16M4 12h16M4 18h16"
+                                />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
+
+                {/* Sidebar Mobile */}
+                {mobileMenuOpen && (
+                    <div className="fixed inset-0 z-[999] md:hidden">
+                        <div
+                            className="absolute inset-0 bg-transparent"
+                            onClick={() => setMobileMenuOpen(false)}
+                        />
+
+                        <div className="absolute right-0 top-0 h-screen w-[58%] min-w-[260px] max-w-xs bg-white shadow-2xl">
+                            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white p-2 shadow-sm ring-1 ring-cyan-100">
+                                        <img
+                                            src="/images/logo-smanding.png"
+                                            alt="Logo SMANDING"
+                                            className="h-full w-full object-contain"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <h2 className="text-sm font-extrabold text-cyan-700">
+                                            SMANDING
+                                        </h2>
+                                        <p className="text-[9px] font-medium text-slate-500">
+                                            SMA N 1 GADINGREJO
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-slate-50"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth={2}
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M6 18L18 6M6 6l12 12"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div className="flex flex-col gap-2 px-4 py-5">
+                                {navItems.map((item) => {
+                                    const isActive = activeSection === item.id;
+
+                                    return (
+                                        <button
+                                            key={item.id}
+                                            type="button"
+                                            onClick={() => handleNavClick(item.id)}
+                                            className={`flex items-center justify-between rounded-2xl px-4 py-3 text-left text-sm font-bold transition ${
+                                                isActive
+                                                    ? "bg-cyan-50 text-cyan-700"
+                                                    : "text-slate-600 hover:bg-cyan-50 hover:text-cyan-700"
+                                            }`}
+                                        >
+                                            <span>{item.label}</span>
+
+                                            {isActive && (
+                                                <span className="h-2 w-2 rounded-full bg-cyan-700" />
+                                            )}
+                                        </button>
+                                    );
+                                })}
+
+                                <Link
+                                    href="/login"
+                                    className="mt-4 inline-flex items-center justify-center gap-2 rounded-2xl bg-cyan-700 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-cyan-800"
+                                >
+                                    <RiLoginBoxLine size={18} />
+                                    Login
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </nav>
 
             <section
@@ -518,37 +640,40 @@ export default function Home({ stats, activeSemester, weeklyAttendance }) {
                         </ResponsiveContainer>
                     </div>
 
-                    <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-4">
-                        {safeWeeklyAttendance.map((item) => (
-                            <div
-                                key={item.date}
-                                className="rounded-2xl bg-cyan-50 p-4"
-                            >
-                                <p className="text-sm font-bold text-slate-700">
-                                    {item.day}, {item.label}
-                                </p>
+                    <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                   {orderedWeeklyAttendance.map((item) => (
+                        <div
+                            key={item.date}
+                            className="rounded-2xl border border-cyan-100 bg-cyan-50/80 p-3 shadow-sm sm:p-4"
+                        >
+                            <p className="text-xs font-extrabold text-slate-700 sm:text-sm">
+                                {item.day}, {item.label}
+                            </p>
 
-                                <p className="mt-1 text-2xl font-extrabold text-cyan-700">
-                                    {item.percentage}%
-                                </p>
+                            <p className="mt-2 text-2xl font-extrabold leading-none text-cyan-700 sm:text-3xl">
+                                {item.percentage}%
+                            </p>
 
-                                <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                                    <span className="rounded-full bg-emerald-100 px-2 py-1 text-emerald-700">
-                                        H {item.hadir}
-                                    </span>
-                                    <span className="rounded-full bg-cyan-100 px-2 py-1 text-cyan-700">
-                                        I {item.izin}
-                                    </span>
-                                    <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-700">
-                                        S {item.sakit}
-                                    </span>
-                                    <span className="rounded-full bg-rose-100 px-2 py-1 text-rose-700">
-                                        A {item.alfa}
-                                    </span>
-                                </div>
+                            <div className="mt-3 grid grid-cols-2 gap-1.5 text-[10px] sm:flex sm:flex-wrap sm:gap-2 sm:text-xs">
+                                <span className="rounded-full bg-emerald-100 px-2 py-1 text-center font-semibold text-emerald-700">
+                                    H {item.hadir}
+                                </span>
+
+                                <span className="rounded-full bg-cyan-100 px-2 py-1 text-center font-semibold text-cyan-700">
+                                    I {item.izin}
+                                </span>
+
+                                <span className="rounded-full bg-amber-100 px-2 py-1 text-center font-semibold text-amber-700">
+                                    S {item.sakit}
+                                </span>
+
+                                <span className="rounded-full bg-rose-100 px-2 py-1 text-center font-semibold text-rose-700">
+                                    A {item.alfa}
+                                </span>
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    ))}
+                </div>
                 </div>
             </section>
 
