@@ -80,9 +80,17 @@ Route::middleware(['auth', 'role:siswa'])
     ->prefix('siswa')
     ->name('siswa.')
     ->group(function () {
-        Route::get('/dashboard', function () {
-            return Inertia::render('Siswa/Dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [SiswaDashboardController::class, 'index'])
+            ->name('dashboard');
+
+        Route::get('/settings', [SiswaSettingController::class, 'index'])
+            ->name('settings');
+
+        Route::post('/settings/profile', [SiswaSettingController::class, 'updateProfile'])
+            ->name('settings.profile');
+
+        Route::patch('/settings/password', [SiswaSettingController::class, 'updatePassword'])
+            ->name('settings.password');
     });
 
 Route::middleware(['auth', 'role:guru'])

@@ -1,5 +1,7 @@
-import React from "react";
+import React, {useState} from "react";
 import { Head, Link, useForm } from "@inertiajs/react";
+import {RiEyeLine,
+RiEyeOffLine,} from "@remixicon/react";
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -7,6 +9,8 @@ export default function Login({ status, canResetPassword }) {
         password: "",
         remember: false,
     });
+
+    const [showPassword, setShowPassword] = useState(false);
 
     const submit = (e) => {
         e.preventDefault();
@@ -173,37 +177,35 @@ export default function Login({ status, canResetPassword }) {
                                 </div>
 
                                 <div>
-                                    <label
-                                        htmlFor="password"
-                                        className="mb-2 block text-sm font-bold text-slate-700"
-                                    >
+                                    <label className="mb-2 block text-sm font-bold text-slate-700">
                                         Password
                                     </label>
 
-                                    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition focus-within:border-sky-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-sky-100">
-                                        <span className="text-slate-400">
-                                            🔒
-                                        </span>
-
+                                    <div className="relative">
                                         <input
-                                            id="password"
-                                            type="password"
+                                            type={showPassword ? "text" : "password"}
                                             name="password"
                                             value={data.password}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "password",
-                                                    e.target.value
-                                                )
-                                            }
-                                            autoComplete="current-password"
+                                            onChange={(e) => setData("password", e.target.value)}
+                                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 pr-12 text-sm text-slate-700 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
                                             placeholder="Masukkan password"
-                                            className="w-full border-none bg-transparent p-0 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:ring-0"
                                         />
+
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-cyan-700"
+                                        >
+                                            {showPassword ? (
+                                                <RiEyeOffLine size={20} />
+                                            ) : (
+                                                <RiEyeLine size={20} />
+                                            )}
+                                        </button>
                                     </div>
 
                                     {errors.password && (
-                                        <p className="mt-2 text-sm font-medium text-rose-500">
+                                        <p className="mt-2 text-sm font-semibold text-rose-500">
                                             {errors.password}
                                         </p>
                                     )}
