@@ -1,7 +1,10 @@
 import React, {useState} from "react";
 import { Head, Link, useForm } from "@inertiajs/react";
 import {RiEyeLine,
-RiEyeOffLine,} from "@remixicon/react";
+RiEyeOffLine,
+RiLock2Fill,
+RiLockPasswordLine,
+RiUser3Line,} from "@remixicon/react";
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -119,7 +122,7 @@ export default function Login({ status, canResetPassword }) {
 
                             <div className="mb-8">
                                 <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-700 text-2xl text-white shadow-md">
-                                    🔐
+                                    <RiLockPasswordLine size={34}/>
                                 </div>
 
                                 <h2 className="text-3xl font-extrabold text-slate-800">
@@ -149,7 +152,7 @@ export default function Login({ status, canResetPassword }) {
 
                                     <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition focus-within:border-sky-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-sky-100">
                                         <span className="text-slate-400">
-                                            ✉️
+                                            <RiUser3Line size={20}/>
                                         </span>
 
                                         <input
@@ -181,20 +184,24 @@ export default function Login({ status, canResetPassword }) {
                                         Password
                                     </label>
 
-                                    <div className="relative">
+                                    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition focus-within:border-sky-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-sky-100">
+                                        <span className="text-slate-400">  
+                                            <RiLockPasswordLine size={20} />
+                                        </span>
+
                                         <input
                                             type={showPassword ? "text" : "password"}
                                             name="password"
                                             value={data.password}
                                             onChange={(e) => setData("password", e.target.value)}
-                                            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 pr-12 text-sm text-slate-700 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                                            className="w-full border-none bg-transparent p-0 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:ring-0"
                                             placeholder="Masukkan password"
                                         />
 
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-cyan-700"
+                                            className=" text-slate-400 transition hover:text-cyan-700"
                                         >
                                             {showPassword ? (
                                                 <RiEyeOffLine size={20} />
