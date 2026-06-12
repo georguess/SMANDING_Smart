@@ -25,7 +25,7 @@ export default function Login({ status, canResetPassword }) {
 
     return (
         <>
-            <Head title="Login - SMANDING" />
+            <Head title="Login" />
 
             <div className="min-h-screen bg-slate-50 p-4 md:p-8">
                 <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl overflow-hidden rounded-[2rem] bg-white shadow-2xl lg:grid-cols-2">
