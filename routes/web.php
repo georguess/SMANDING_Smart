@@ -75,6 +75,16 @@ Route::middleware(['auth', 'role:guru'])
         })->name('dashboard');
     });
 
+
+Route::middleware(['auth', 'role:siswa'])
+    ->prefix('siswa')
+    ->name('siswa.')
+    ->group(function () {
+        Route::get('/dashboard', function () {
+            return Inertia::render('Siswa/Dashboard');
+        })->name('dashboard');
+    });
+
 Route::middleware(['auth', 'role:guru'])
     ->prefix('guru')
     ->name('guru.')
