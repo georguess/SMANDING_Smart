@@ -61,11 +61,14 @@ class AttendanceController extends Controller
                 ], 422);
             }
         }
+        $activeSemester = Semester::where('is_active', true)->first();
 
-        $semester = Semester::where('is_active', true)->first();
-        $semester = Semester::orderByDesc('is_active')
-        ->orderByDesc('id')
-        ->get();
+        if (!$activeSemester) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Belum ada semester aktif.',
+            ], 422);
+        }
 
         $fotoPath = null;
 
@@ -75,9 +78,11 @@ class AttendanceController extends Controller
 
         $today = now()->toDateString();
 
-        $existingAttendance = Attendance::where('siswa_id', $siswa->id)
-            ->whereDate('waktu_absen', $today)
-            ->first();
+        $existingAttendance = Attendance::with(['siswa.kelas', 'rfidReader', 'semester'])
+        ->where('siswa_id', $siswa->id)
+        ->where('semester_id', $activeSemester->id)
+        ->whereDate('waktu_absen', $today)
+        ->first();
 
         if ($existingAttendance) {
             return response()->json([
@@ -89,6 +94,9 @@ class AttendanceController extends Controller
                     'nama' => $siswa->nama,
                     'nis' => $siswa->nis,
                     'kelas' => $siswa->kelas?->nama_kelas,
+                    'semester' => $existingAttendance->semester
+                    ? $existingAttendance->semester->semester . ' - ' . $existingAttendance->semester->tahun_akademik
+                    : null,
                     'waktu_absen' => $existingAttendance->waktu_absen,
                     'status_absensi' => $existingAttendance->status,
                     'foto' => $existingAttendance->foto
@@ -102,8 +110,10 @@ class AttendanceController extends Controller
             'user_id' => $siswa->user_id,
             'siswa_id' => $siswa->id,
             'kelas_id' => $siswa->kelas_id,
-            'semester_id' => $siswa->kelas?->semester_id,
+            'semester_id' => $activeSemester->id,
+            'rfid_card_id' => $rfidCard->id,
             'rfid_reader_id' => $validated['rfid_reader_id'] ?? null,
+            'guru_id' => $siswa->kelas?->guru_id,
             'waktu_absen' => now(),
             'status' => 'hadir',
             'foto' => $fotoPath,
@@ -121,7 +131,9 @@ class AttendanceController extends Controller
                 'nis' => $attendance->siswa?->nis,
                 'kelas' => $attendance->kelas?->nama_kelas,
                 'reader' => $attendance->rfidReader?->lokasi,
-                'semester' => $attendance->semester?->nama ?? $attendance->semester?->name,
+                'semester' => $attendance->semester
+                ? $attendance->semester->semester . ' - ' . $attendance->semester->tahun_akademik
+                : null,
                 'waktu_absen' => $attendance->waktu_absen,
                 'status_absensi' => $attendance->status,
                 'foto' => $attendance->foto
