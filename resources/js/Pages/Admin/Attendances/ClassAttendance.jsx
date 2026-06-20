@@ -4,15 +4,17 @@ import { formatDateTime } from "@/Utils/FormatDate";
 
 export default function ClassAttendance({
     classData,
+    activeSemester,
     attendances,
     statusCounts,
     filters,
 }) {
     const [filterData, setFilterData] = useState({
-        month: filters.month || "",
-        year: filters.year || new Date().getFullYear(),
-        status: filters.status || "",
-    });
+    month: filters.month || "",
+    year: filters.year || new Date().getFullYear(),
+    status: filters.status || "",
+    
+});
 
     const months = [
         { value: "1", label: "Januari" },
@@ -66,9 +68,10 @@ export default function ClassAttendance({
                     </h1>
                     <p className="text-sm text-gray-500">
                         Semester: {" "}
-    {classData.semester
-        ? `${classData.semester.semester} - ${classData.semester.tahun_akademik}`
-        : "-"}{" "} | Wali Kelas:{" "}
+    Semester:{" "}
+{activeSemester
+    ? `${activeSemester.semester} - ${activeSemester.tahun_akademik}`
+    : "-"}{" "} | Wali Kelas:{" "}
                         {classData.wali_kelas?.nama || "-"} | Jumlah Siswa:{" "}
                         {classData.siswas_count}
                     </p>

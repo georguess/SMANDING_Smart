@@ -1,5 +1,10 @@
-import React from "react";
+import React, {useState} from "react";
 import { Head, Link, useForm } from "@inertiajs/react";
+import {RiEyeLine,
+RiEyeOffLine,
+RiLock2Fill,
+RiLockPasswordLine,
+RiUser3Line,} from "@remixicon/react";
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -7,6 +12,8 @@ export default function Login({ status, canResetPassword }) {
         password: "",
         remember: false,
     });
+
+    const [showPassword, setShowPassword] = useState(false);
 
     const submit = (e) => {
         e.preventDefault();
@@ -18,7 +25,7 @@ export default function Login({ status, canResetPassword }) {
 
     return (
         <>
-            <Head title="Login - SMANDING" />
+            <Head title="Login" />
 
             <div className="min-h-screen bg-slate-50 p-4 md:p-8">
                 <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl overflow-hidden rounded-[2rem] bg-white shadow-2xl lg:grid-cols-2">
@@ -115,7 +122,7 @@ export default function Login({ status, canResetPassword }) {
 
                             <div className="mb-8">
                                 <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-700 text-2xl text-white shadow-md">
-                                    🔐
+                                    <RiLockPasswordLine size={34}/>
                                 </div>
 
                                 <h2 className="text-3xl font-extrabold text-slate-800">
@@ -145,7 +152,7 @@ export default function Login({ status, canResetPassword }) {
 
                                     <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition focus-within:border-sky-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-sky-100">
                                         <span className="text-slate-400">
-                                            ✉️
+                                            <RiUser3Line size={20}/>
                                         </span>
 
                                         <input
@@ -173,37 +180,39 @@ export default function Login({ status, canResetPassword }) {
                                 </div>
 
                                 <div>
-                                    <label
-                                        htmlFor="password"
-                                        className="mb-2 block text-sm font-bold text-slate-700"
-                                    >
+                                    <label className="mb-2 block text-sm font-bold text-slate-700">
                                         Password
                                     </label>
 
                                     <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition focus-within:border-sky-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-sky-100">
-                                        <span className="text-slate-400">
-                                            🔒
+                                        <span className="text-slate-400">  
+                                            <RiLockPasswordLine size={20} />
                                         </span>
 
                                         <input
-                                            id="password"
-                                            type="password"
+                                            type={showPassword ? "text" : "password"}
                                             name="password"
                                             value={data.password}
-                                            onChange={(e) =>
-                                                setData(
-                                                    "password",
-                                                    e.target.value
-                                                )
-                                            }
-                                            autoComplete="current-password"
-                                            placeholder="Masukkan password"
+                                            onChange={(e) => setData("password", e.target.value)}
                                             className="w-full border-none bg-transparent p-0 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:ring-0"
+                                            placeholder="Masukkan password"
                                         />
+
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className=" text-slate-400 transition hover:text-cyan-700"
+                                        >
+                                            {showPassword ? (
+                                                <RiEyeOffLine size={20} />
+                                            ) : (
+                                                <RiEyeLine size={20} />
+                                            )}
+                                        </button>
                                     </div>
 
                                     {errors.password && (
-                                        <p className="mt-2 text-sm font-medium text-rose-500">
+                                        <p className="mt-2 text-sm font-semibold text-rose-500">
                                             {errors.password}
                                         </p>
                                     )}

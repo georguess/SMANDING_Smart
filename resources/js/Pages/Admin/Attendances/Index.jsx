@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "@inertiajs/react";
 
-export default function Index({ classes }) {
+export default function Index({ classes, activeSemester }) {
     return (
         <div className="min-h-screen bg-slate-100 rounded-xl p-6">
             <div className="mb-6">
@@ -25,9 +25,10 @@ export default function Index({ classes }) {
                             </h2>
 
                             <p className="mt-1 text-sm text-gray-500">
-                                Semester: {item.semester
-                                ? `${item.semester.semester} - ${item.semester.tahun_akademik}`
-                                : "-"}
+                                Semester:{" "}
+                                {activeSemester
+                                    ? `${activeSemester.semester} - ${activeSemester.tahun_akademik}`
+                                    : "-"}
                             </p>
 
                             <p className="mt-1 text-sm text-gray-500">

@@ -14,7 +14,11 @@ import {
     Legend,
 } from "recharts";
 
-export default function Dashboard({ auth, siswa, attendances, weeklyAttendance, stats }) {
+export default function Dashboard({
+    siswa,
+    attendances = [],
+    weeklyAttendance = [],
+}) {
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (

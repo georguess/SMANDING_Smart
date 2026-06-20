@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Guru;
 use App\Models\Kelas;
 use App\Models\User;
+use App\Models\Semester;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
@@ -14,7 +15,24 @@ class WaliKelasSeeder extends Seeder
 {
     public function run(): void
     {
-        $tahunAjaran = '2025/2026';
+       $tahunAjaran = '2025/2026';
+        $namaSemester = 'Ganjil';
+
+        $semester = Semester::where('semester', $namaSemester)
+            ->where('tahun_akademik', $tahunAjaran)
+            ->first();
+
+        if (!$semester) {
+            $semester = new Semester();
+            $semester->semester = $namaSemester;
+            $semester->tahun_akademik = $tahunAjaran;
+
+            if (Schema::hasColumn('semesters', 'is_active')) {
+                $semester->is_active = true;
+            }
+
+            $semester->save();
+        }
 
         $dataWaliKelas = [
             ['kelas' => 'X 1', 'wali_kelas' => 'Isnantara, S.Pd.'],
@@ -136,12 +154,17 @@ class WaliKelasSeeder extends Seeder
             */
             $kelas = Kelas::firstOrNew([
                 'nama_kelas' => $namaKelas,
+                'semester_id' => $semester->id,
             ]);
 
             $kelas->nama_kelas = $namaKelas;
 
             if (Schema::hasColumn('kelas', 'tahun_ajaran')) {
                 $kelas->tahun_ajaran = $tahunAjaran;
+            }
+
+            if (Schema::hasColumn('kelas', 'semester_id')) {
+                $kelas->semester_id = $semester->id;
             }
 
             if (Schema::hasColumn('kelas', 'guru_id')) {

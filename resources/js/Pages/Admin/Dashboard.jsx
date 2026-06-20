@@ -202,11 +202,11 @@ export default function Dashboard({
             <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4">
                 {statCards.map((item) => {
                     const Icon = item.icon;
-
+                    
                     return (
                         <div
-                            key={item.label}
-                            className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                        key={item.label}
+                        className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
                         >
                             <div className="flex items-center justify-between gap-4">
                                 <div className="min-w-0">
@@ -220,7 +220,7 @@ export default function Dashboard({
 
                                 <div
                                     className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${item.color} text-white shadow-sm`}
-                                >
+                                    >
                                     <Icon size={26} />
                                 </div>
                             </div>
@@ -244,7 +244,7 @@ export default function Dashboard({
                         <Link
                             href="/admin/attendances"
                             className="text-sm font-bold text-cyan-700 hover:text-cyan-800"
-                        >
+                            >
                             Lihat Absensi
                         </Link>
                     </div>
@@ -252,16 +252,16 @@ export default function Dashboard({
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         {quickActions.map((item) => {
                             const Icon = item.icon;
-
+                            
                             return (
                                 <Link
-                                    key={item.title}
-                                    href={item.href}
-                                    className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:border-cyan-200 hover:shadow-md"
+                                key={item.title}
+                                href={item.href}
+                                className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:border-cyan-200 hover:shadow-md"
                                 >
                                     <div
                                         className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${item.color} text-white shadow-sm`}
-                                    >
+                                        >
                                         <Icon size={26} />
                                     </div>
 
@@ -292,18 +292,18 @@ export default function Dashboard({
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-2">
                         {attendanceCards.map((item) => {
                             const Icon = item.icon;
-
+                            
                             return (
                                 <div
-                                    key={item.label}
-                                    className={`rounded-2xl ${item.bg} p-4 transition hover:-translate-y-1 hover:shadow-md`}
+                                key={item.label}
+                                className={`rounded-2xl ${item.bg} p-4 transition hover:-translate-y-1 hover:shadow-md`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white shadow-sm">
                                             <Icon
                                                 size={24}
                                                 className={item.color}
-                                            />
+                                                />
                                         </div>
 
                                         <div>
@@ -312,7 +312,7 @@ export default function Dashboard({
                                             </p>
                                             <h3
                                                 className={`text-2xl font-extrabold ${item.color}`}
-                                            >
+                                                >
                                                 {item.value}
                                             </h3>
                                         </div>
@@ -352,18 +352,18 @@ export default function Dashboard({
                                     left: 0,
                                     bottom: 10,
                                 }}
-                            >
+                                >
                                 <CartesianGrid
                                     strokeDasharray="3 3"
                                     stroke="#E2E8F0"
-                                />
+                                    />
 
                                 <XAxis
                                     dataKey="name"
                                     tick={{ fill: "#475569", fontSize: 12 }}
                                     axisLine={false}
                                     tickLine={false}
-                                />
+                                    />
 
                                 <YAxis
                                     domain={[0, 100]}
@@ -371,7 +371,7 @@ export default function Dashboard({
                                     axisLine={false}
                                     tickLine={false}
                                     tickFormatter={(value) => `${value}%`}
-                                />
+                                    />
 
                                 <Tooltip content={<CustomTooltip />} />
                                 <Legend />
@@ -394,7 +394,7 @@ export default function Dashboard({
                                         stroke: "#0E7490",
                                         strokeWidth: 3,
                                     }}
-                                />
+                                    />
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
@@ -403,8 +403,8 @@ export default function Dashboard({
                 <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-7">
                     {weeklyAttendance.map((item) => (
                         <div
-                            key={item.date}
-                            className="rounded-2xl bg-cyan-50 p-4"
+                        key={item.date}
+                        className="rounded-2xl bg-cyan-50 p-4"
                         >
                             <p className="text-sm font-bold text-slate-700">
                                 {item.day}, {item.label}
@@ -442,8 +442,8 @@ export default function Dashboard({
 
 Dashboard.layout = (page) => (
     <AdminLayout
-        title="Dashboard"
-        subtitle="Pantau data sekolah dan aktivitas absensi melalui website."
+    title="Dashboard"
+    subtitle="Pantau data sekolah dan aktivitas absensi melalui website."
     >
         {page}
     </AdminLayout>

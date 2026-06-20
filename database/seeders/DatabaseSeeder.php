@@ -25,12 +25,14 @@ class DatabaseSeeder extends Seeder
             'username' => 'admin_utama',
             'email' => 'admin@sekolah.com',
             'password' => bcrypt('password123'),
-            'role' => 'admin'
+            'role' => 'admin',
+            'is_active' => true,
         ]);
+
         Admin::create([
             'user_id' => $userAdmin->id,
             'nama' => 'Administrator Sistem',
-            'nip' => '198001012005011001'
+            'nip' => '198001012005011001',
         ]);
 
         // 2. Buat Data Akun dan Profil Guru
@@ -38,32 +40,45 @@ class DatabaseSeeder extends Seeder
             'username' => 'guru_budi',
             'email' => 'budi@sekolah.com',
             'password' => bcrypt('password123'),
-            'role' => 'guru'
+            'role' => 'guru',
+            'is_active' => true,
         ]);
+
         $guru = Guru::create([
             'user_id' => $userGuru->id,
             'nama' => 'Budi Santoso, S.Pd',
-            'nip' => '198502022010011002'
+            'nip' => '198502022010011002',
         ]);
 
-        // 3. Buat Data Akun dan Profil Siswa
+        // 3. Buat Data Semester
+        $semesterGanjil = Semester::create([
+            'semester' => 'Ganjil',
+            'tahun_akademik' => '2025/2026',
+            'is_active' => true,
+        ]);
+
+        $semesterGenap = Semester::create([
+            'semester' => 'Genap',
+            'tahun_akademik' => '2025/2026',
+            'is_active' => false,
+        ]);
+
+        // 4. Buat Data Kelas
+        $kelas = Kelas::create([
+            'nama_kelas' => 'X7',
+            'guru_id' => $guru->id,
+            'semester_id' => $semesterGanjil->id,
+            'tahun_ajaran' => $semesterGanjil->tahun_akademik,
+        ]);
+
+        // 5. Buat Data Akun dan Profil Siswa
         $userSiswa = User::create([
             'username' => 'siswa_andi',
             'email' => 'andi@siswa.com',
             'password' => bcrypt('password123'),
-            'role' => 'siswa'
+            'role' => 'siswa',
+            'is_active' => true,
         ]);
-
-        $semester = Semester::create([
-    'semester' => 'Ganjil',
-    'tahun_akademik' => '2025/2026',
-]);
-
-$kelas = Kelas::create([
-    'nama_kelas' => 'X7',
-    'guru_id' => $guru->id,
-    'tahun_ajaran' => '2025/2026',
-]);
 
         $siswa = Siswa::create([
             'user_id' => $userSiswa->id,
@@ -71,33 +86,33 @@ $kelas = Kelas::create([
             'nis' => '1123',
             'nisn' => '0051234567',
             'kelas_id' => $kelas->id,
+            'alamat' => 'Lampung',
         ]);
 
-        // 4. Buat Data Mesin RFID Reader
+        // 6. Buat Data Mesin RFID Reader
         $reader = RfidReader::create([
-            'lokasi' => 'Gerbang Utama Sekolah'
+            'lokasi' => 'Gerbang Utama Sekolah',
         ]);
 
-        // 5. Buat Data Kartu RFID (Dimiliki oleh Siswa Andi)
+        // 7. Buat Data Kartu RFID
         $card = RfidCard::create([
             'siswa_id' => $siswa->id,
-            'uid_card' => 'A1B2C3D4E5'
+            'uid_card' => 'A1B2C3D4E5',
+            'status' => 'active',
         ]);
 
-        $this->call([
-        WaliKelasSeeder::class,
-    ]);
-
-        // 6. Buat Data Simulasi Kehadiran (Presensi)
+        // 8. Buat Data Simulasi Kehadiran
         Attendance::create([
-            'user_id' => $userSiswa->id, // User yang absen (Andi)
+            'user_id' => $userSiswa->id,
             'siswa_id' => $siswa->id,
             'kelas_id' => $kelas->id,
-            'rfid_card_id' => $card->id, // Memakai kartu A1B...
-            'rfid_reader_id' => $reader->id, // Di Gerbang Utama
-            'guru_id' => $guru->id, // Diawasi oleh Pak Budi
-            'waktu_absen' => now()->subHours(2), // Absen 2 jam yang lalu
-            'status' => 'hadir'
+            'semester_id' => $semesterGanjil->id,
+            'rfid_card_id' => $card->id,
+            'rfid_reader_id' => $reader->id,
+            'guru_id' => $guru->id,
+            'waktu_absen' => now()->subHours(2),
+            'status' => 'hadir',
+            'foto' => null,
         ]);
     }
 }

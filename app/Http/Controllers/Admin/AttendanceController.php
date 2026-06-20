@@ -14,34 +14,34 @@ class AttendanceController extends Controller
 {
     public function index()
     {
-        $classes = Kelas::with('waliKelas', 'semester')
+        $classes = Kelas::with(['waliKelas', 'semester'])
             ->withCount('siswas')
-            ->orderBy('nama_kelas')
+            ->orderBy('nama_kelas', 'asc')
             ->get();
+
+        $activeSemester = Semester::where('is_active', true)->first();
 
         return Inertia::render('Admin/Attendances/Index', [
             'classes' => $classes,
+            'activeSemester' => $activeSemester,
         ]);
     }
 
     public function classAttendance(Request $request, Kelas $kelas)
-{
-    $kelas->load(['waliKelas', 'semester']);
-    $kelas->loadCount('siswas');
+    {
+        $kelas->load(['waliKelas', 'semester']);
+        $kelas->loadCount('siswas');
 
-    $semesters = Semester::orderByDesc('tahun_akademik')
-        ->orderBy('semester')
-        ->get();
+        $activeSemester = Semester::where('is_active', true)->first();
 
-    $semesterId = $request->input('semester_id');
-    $month = $request->input('month');
-    $year = $request->input('year', now()->year);
-    $status = $request->input('status');
+        $month = $request->input('month');
+        $year = $request->input('year', now()->year);
+        $status = $request->input('status');
 
-    $baseQuery = Attendance::query()
+        $baseQuery = Attendance::query()
         ->where('attendances.kelas_id', $kelas->id)
-        ->when($semesterId, function ($query) use ($semesterId) {
-            $query->where('attendances.semester_id', $semesterId);
+        ->when($activeSemester, function ($query) use ($activeSemester) {
+            $query->where('attendances.semester_id', $activeSemester->id);
         })
         ->when($month, function ($query) use ($month) {
             $query->whereMonth('attendances.waktu_absen', $month);
@@ -50,43 +50,53 @@ class AttendanceController extends Controller
             $query->whereYear('attendances.waktu_absen', $year);
         });
 
-    $statusCounts = [
-        'hadir' => (clone $baseQuery)->where('attendances.status', 'hadir')->count(),
-        'izin' => (clone $baseQuery)->where('attendances.status', 'izin')->count(),
-        'sakit' => (clone $baseQuery)->where('attendances.status', 'sakit')->count(),
-        'alfa' => (clone $baseQuery)->where('attendances.status', 'alfa')->count(),
-    ];
+        $statusCounts = [
+            'hadir' => (clone $baseQuery)
+                ->where('attendances.status', 'hadir')
+                ->count(),
 
-    $attendances = (clone $baseQuery)
-        ->select('attendances.*')
-        ->join('siswas', 'attendances.siswa_id', '=', 'siswas.id')
-        ->with([
-            'siswa.user',
-            'kelas',
-            'semester',
-            'rfidReader',
-        ])
-        ->when($status, function ($query) use ($status) {
-            $query->where('attendances.status', $status);
-        })
-        ->orderBy('siswas.nama', 'asc')
-        ->orderBy('attendances.waktu_absen', 'asc')
-        ->paginate(15)
-        ->withQueryString();
+            'izin' => (clone $baseQuery)
+                ->where('attendances.status', 'izin')
+                ->count(),
 
-    return Inertia::render('Admin/Attendances/ClassAttendance', [
-        'classData' => $kelas,
-        'semesters' => $semesters,
-        'attendances' => $attendances,
-        'statusCounts' => $statusCounts,
-        'filters' => [
-            'semester_id' => $semesterId,
-            'month' => $month,
-            'year' => $year,
-            'status' => $status,
-        ],
-    ]);
-}
+            'sakit' => (clone $baseQuery)
+                ->where('attendances.status', 'sakit')
+                ->count(),
+
+            'alfa' => (clone $baseQuery)
+                ->where('attendances.status', 'alfa')
+                ->count(),
+        ];
+
+        $attendances = (clone $baseQuery)
+            ->select('attendances.*')
+            ->join('siswas', 'attendances.siswa_id', '=', 'siswas.id')
+            ->with([
+                'siswa.user',
+                'kelas.semester',
+                'semester',
+                'rfidReader',
+            ])
+            ->when($status, function ($query) use ($status) {
+                $query->where('attendances.status', $status);
+            })
+            ->orderBy('siswas.nama', 'asc')
+            ->orderBy('attendances.waktu_absen', 'asc')
+            ->paginate(15)
+            ->withQueryString();
+
+        return Inertia::render('Admin/Attendances/ClassAttendance', [
+            'classData' => $kelas,
+            'activeSemester' => $activeSemester,
+            'attendances' => $attendances,
+            'statusCounts' => $statusCounts,
+            'filters' => [
+                'month' => $month,
+                'year' => $year,
+                'status' => $status,
+            ],
+        ]);
+    }
 
     public function updateStatus(Request $request, Attendance $attendance)
     {
@@ -96,7 +106,6 @@ class AttendanceController extends Controller
 
         $attendance->update([
             'status' => $validated['status'],
-            'marked_by' => auth()->id(),
         ]);
 
         return back()->with('success', 'Status absensi berhasil diperbarui.');

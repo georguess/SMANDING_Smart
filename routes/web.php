@@ -75,6 +75,24 @@ Route::middleware(['auth', 'role:guru'])
         })->name('dashboard');
     });
 
+
+Route::middleware(['auth', 'role:siswa'])
+    ->prefix('siswa')
+    ->name('siswa.')
+    ->group(function () {
+        Route::get('/dashboard', [SiswaDashboardController::class, 'index'])
+            ->name('dashboard');
+
+        Route::get('/settings', [SiswaSettingController::class, 'index'])
+            ->name('settings');
+
+        Route::post('/settings/profile', [SiswaSettingController::class, 'updateProfile'])
+            ->name('settings.profile');
+
+        Route::patch('/settings/password', [SiswaSettingController::class, 'updatePassword'])
+            ->name('settings.password');
+    });
+
 Route::middleware(['auth', 'role:guru'])
     ->prefix('guru')
     ->name('guru.')

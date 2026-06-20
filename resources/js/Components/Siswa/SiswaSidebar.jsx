@@ -78,14 +78,24 @@ export default function SiswaSidebar() {
                 <div className="flex items-center justify-between rounded-2xl bg-[#095E6F] p-2 shadow-inner">
                     <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-lg font-bold text-[#0C7489]">
-                            {user.username ? user.username.charAt(0).toUpperCase() : "S"}
+                            {user?.photo_profile ? (
+                                <img
+                                    src={`/storage/${user.photo_profile}`}
+                                    alt={user.username}
+                                    className="h-12 w-12 rounded-2xl object-cover"
+                                />
+                            ) : (
+                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-lg font-extrabold text-cyan-700">
+                                    {user?.username?.charAt(0)?.toUpperCase() ?? "S"}
+                                </div>
+                            )}
                         </div>
                         <div>
                             <p className="text-sm font-extrabold text-white">
-                                {user.username || "Siswa"}
+                                {user?.username}
                             </p>
-                            <p className="text-xs font-semibold tracking-wide text-white/70 capitalize">
-                                {user.role || "Siswa"}
+                            <p className="text-xs text-white/80">
+                                Siswa
                             </p>
                         </div>
                     </div>
