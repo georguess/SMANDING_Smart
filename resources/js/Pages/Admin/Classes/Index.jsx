@@ -1,8 +1,23 @@
 import React, { useState } from "react";
 import { Link, router } from "@inertiajs/react";
+import ConfirmModal from "@/Components/ConfirmModal";
 
 export default function Index({ classes, filters }) {
     const [search, setSearch] = useState(filters.search || "");
+
+    const [modal, setModal] = useState({
+        isOpen:  false,
+        message: "",
+        onConfirm: null,
+    });
+
+    const openModal = (message, onConfirm) => {
+        setModal({ isOpen: true, message, onConfirm });
+    };
+    
+    const closeModal = () => {
+        setModal({ isOpen: false, message: "", onConfirm: null });
+    };
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -18,13 +33,21 @@ export default function Index({ classes, filters }) {
     };
 
     const handleDelete = (id) => {
-        if (confirm("Yakin ingin menghapus kelas ini?")) {
+       openModal("Yakin ingin menghapus kelas ini? Data tidak bisa dikembalikan.", () => {
             router.delete(`/admin/classes/${id}`);
-        }
+            closeModal();
+        });
     };
 
     return (
         <div className="min-h-screen bg-slate-100 rounded-xl p-6">
+            {/* Modal Konfirmasi */}
+            <ConfirmModal
+                isOpen={modal.isOpen}
+                message={modal.message}
+                onConfirm={modal.onConfirm}
+                onCancel={closeModal}
+            />
             <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">

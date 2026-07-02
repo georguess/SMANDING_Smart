@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Head } from "@inertiajs/react";
 import AdminSidebar from "@/Components/Admin/AdminSidebar";
 import AdminTopbar from "@/Components/Admin/AdminTopbar";
+import AlertCard from "@/Components/AlertCard";
 
 export default function AdminLayout({
     children,
@@ -35,6 +36,7 @@ export default function AdminLayout({
                     />
 
                     <main className="p-4 sm:p-5 lg:p-6">
+                        <AlertCard/>
                         {children}
                     </main>
                 </div>

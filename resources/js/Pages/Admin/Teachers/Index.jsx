@@ -1,36 +1,47 @@
 import React, { useState } from "react";
 import { Link, router } from "@inertiajs/react";
+import ConfirmModal from "@/Components/ConfirmModal";
 
 export default function Index({ teachers, filters }) {
     const [search, setSearch] = useState(filters.search || "");
 
+    const [modal, setModal] = useState({
+        isOpen:  false,
+        message: "",
+        onConfirm: null,
+    });
+    const openModal = (message, onConfirm) => {
+        setModal({ isOpen: true, message, onConfirm });
+    };
+    const closeModal = () => {
+        setModal({ isOpen: false, message: "", onConfirm: null });
+    };
     const handleSearch = (e) => {
         e.preventDefault();
-
-        router.get(
-            "/admin/teachers",
-            { search },
-            {
-                preserveState: true,
-                replace: true,
-            }
-        );
+        router.get("/admin/teachers", { search }, { preserveState: true, replace: true });
     };
-
     const handleDelete = (id) => {
-        if (confirm("Yakin ingin menghapus guru ini?")) {
-            router.delete(`/admin/teachers/${id}`);
-        }
+        openModal("Yakin ingin menghapus akun guru ini? Data tidak bisa dikembalikan.", () => {
+            router.delete(`/admin/students/${id}`);
+            closeModal();
+        });
     };
-
     const handleResetPassword = (id) => {
-        if (confirm("Reset password guru ke tanggal lahir?")) {
+        openModal("Reset password guru ke password default (Smanding@26)?", () => {
             router.patch(`/admin/teachers/${id}/reset-password`);
-        }
+            closeModal();
+        });
     };
 
     return (
         <div className="min-h-screen bg-slate-100 rounded-xl p-6">
+            {/* Modal Konfirmasi */}
+            <ConfirmModal
+                isOpen={modal.isOpen}
+                message={modal.message}
+                onConfirm={modal.onConfirm}
+                onCancel={closeModal}
+            />
             <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">
