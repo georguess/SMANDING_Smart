@@ -205,7 +205,10 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/settings', [SiswaSettingController::class, 'edit'])
             ->name('settings.edit');
 
-        Route::post('/settings/profile', [SiswaSettingController::class, 'updateProfile'])
+        Route::post('/settings/photo', [SiswaSettingController::class, 'updatePhoto'])
+            ->name('settings.photo');
+
+        Route::patch('/settings/profile', [SiswaSettingController::class, 'updateProfile'])
             ->name('settings.profile');
 
         Route::patch('/settings/password', [SiswaSettingController::class, 'updatePassword'])

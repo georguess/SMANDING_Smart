@@ -16,6 +16,8 @@ use Inertia\Inertia;
 
 class StudentController extends Controller
 {
+    private const DEFAULT_PASSWORD = 'Smanding@26';
+
     public function index(Request $request)
     {
         $search = $request->input('search');
@@ -69,7 +71,7 @@ class StudentController extends Controller
             'birth_date' => ['required', 'date'],
             'photo_profile' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'nis' => ['required', 'string', 'max:30', 'unique:siswas,nis'],
-            'nisn' => ['nullable', 'string', 'max:30', 'unique:siswas,nisn'],
+            'nisn' => ['required', 'string', 'max:30', 'unique:siswas,nisn'],
             'alamat' => ['nullable', 'string'],
             'kelas_id' => ['required', 'exists:kelas,id'],
             'is_active' => ['required', 'boolean'],
@@ -82,12 +84,10 @@ class StudentController extends Controller
                 $photoPath = $request->file('photo_profile')->store('profile/siswa', 'public');
             }
 
-            $defaultPassword = Carbon::parse($validated['birth_date'])->format('dmY');
-
             $user = User::create([
-                'username' => $validated['nama'],
+                'username' => $validated['nisn'],
                 'email' => $validated['email'],
-                'password' => Hash::make($defaultPassword),
+                'password' => Hash::make(self::DEFAULT_PASSWORD),
                 'role' => 'siswa',
                 'photo_profile' => $photoPath,
                 'birth_date' => $validated['birth_date'],
@@ -143,7 +143,7 @@ class StudentController extends Controller
                 Rule::unique('siswas', 'nis')->ignore($student->id),
             ],
             'nisn' => [
-                'nullable',
+                'required',
                 'string',
                 'max:30',
                 Rule::unique('siswas', 'nisn')->ignore($student->id),
@@ -165,7 +165,7 @@ class StudentController extends Controller
             }
 
             $student->user->update([
-                'username' => $validated['nama'],
+                'username' => $validated['nisn'],
                 'email' => $validated['email'],
                 'photo_profile' => $photoPath,
                 'birth_date' => $validated['birth_date'],
@@ -211,16 +211,14 @@ class StudentController extends Controller
     {
         $student->load('user');
 
-        if (!$student->user || !$student->user->birth_date) {
-            return back()->with('error', 'Tanggal lahir siswa belum tersedia.');
+        if (!$student->user) {
+            return back()->with('error', 'Data siswa belum lengkap.');
         }
 
-        $defaultPassword = Carbon::parse($student->user->birth_date)->format('dmY');
-
         $student->user->update([
-            'password' => Hash::make($defaultPassword),
+            'password' => Hash::make(self::DEFAULT_PASSWORD),
         ]);
 
-        return back()->with('success', 'Password siswa berhasil direset ke tanggal lahir.');
+        return back()->with('success', 'Password siswa berhasil direset ke password default.');
     }
 }

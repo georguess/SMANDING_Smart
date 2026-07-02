@@ -8,7 +8,7 @@ RiUser3Line,} from "@remixicon/react";
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
-        email: "",
+        login: "",
         password: "",
         remember: false,
     });
@@ -144,10 +144,10 @@ export default function Login({ status, canResetPassword }) {
                             <form onSubmit={submit} className="space-y-5">
                                 <div>
                                     <label
-                                        htmlFor="email"
+                                        htmlFor="login"
                                         className="mb-2 block text-sm font-bold text-slate-700"
                                     >
-                                        Username
+                                        NISN / Username / Email
                                     </label>
 
                                     <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition focus-within:border-sky-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-sky-100">
@@ -156,25 +156,25 @@ export default function Login({ status, canResetPassword }) {
                                         </span>
 
                                         <input
-                                            id="email"
-                                            type="email"
-                                            name="email"
-                                            value={data.email}
+                                            id="login"
+                                            type="text"
+                                            name="login"
+                                            value={data.login}
                                             onChange={(e) =>
                                                 setData(
-                                                    "email",
+                                                    "login",
                                                     e.target.value
                                                 )
                                             }
                                             autoComplete="username"
-                                            placeholder="nama@email.com"
+                                            placeholder="Masukkan NISN, username, atau email"
                                             className="w-full border-none bg-transparent p-0 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:ring-0"
                                         />
                                     </div>
 
-                                    {errors.email && (
+                                    {errors.login && (
                                         <p className="mt-2 text-sm font-medium text-rose-500">
-                                            {errors.email}
+                                            {errors.login}
                                         </p>
                                     )}
                                 </div>

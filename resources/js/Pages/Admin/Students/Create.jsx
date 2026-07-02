@@ -28,7 +28,7 @@ export default function Create({ classes }) {
                     Tambah Siswa
                 </h1>
                 <p className="text-sm text-gray-500">
-                    Password default siswa otomatis memakai tanggal lahir dengan format ddmmyyyy.
+                    Username login siswa memakai NISN dan password default memakai Smanding@26.
                 </p>
             </div>
 
