@@ -119,7 +119,7 @@ class AttendanceController extends Controller
             'foto' => $fotoPath,
         ]);
 
-        $attendance->load(['siswa.kelas', 'rfidReader', 'semester']);
+        $attendance->load(['siswa', 'kelas', 'semester', 'rfidReader']);
 
         return response()->json([
             'success' => true,
@@ -154,7 +154,7 @@ class AttendanceController extends Controller
                     'id' => $attendance->id,
                     'nama' => $attendance->siswa?->nama,
                     'nis' => $attendance->siswa?->nis,
-                    'kelas' => $attendance->siswa?->kelas?->nama_kelas,
+                    'kelas' => $attendance->kelas?->nama_kelas,
                     'reader' => $attendance->rfidReader?->lokasi,
                     'waktu_absen' => $attendance->waktu_absen,
                     'status' => $attendance->status,
