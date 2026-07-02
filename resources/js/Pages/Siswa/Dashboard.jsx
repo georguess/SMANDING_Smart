@@ -21,12 +21,21 @@ export default function Dashboard({
 }) {
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
+            const data = payload[0].payload;
+
             return (
-                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xl">
+                <div className="rounded-2xl border border-cyan-100 bg-white p-4 shadow-lg">
                     <p className="font-bold text-slate-800">{label}</p>
-                    <p className="mt-1 text-sm font-semibold text-sky-600">
-                        {payload[0].value}% Kehadiran
+                    <p className="text-sm font-semibold text-cyan-700">
+                        Kehadiran: {data.percentage}%
                     </p>
+
+                    <div className="mt-2 space-y-1 text-xs text-slate-600">
+                        <p>Hadir: {data.hadir}</p>
+                        <p>Izin: {data.izin}</p>
+                        <p>Sakit: {data.sakit}</p>
+                        <p>Alpha: {data.alfa}</p>
+                    </div>
                 </div>
             );
         }
@@ -35,6 +44,11 @@ export default function Dashboard({
 
     const chartData = weeklyAttendance.map((item) => ({
         name: `${item.label}`,
+        day: item.day,
+        hadir: item.hadir,
+        izin: item.izin,
+        sakit: item.sakit,
+        alfa: item.alfa,
         percentage: item.percentage,
     }));
 
@@ -46,25 +60,26 @@ export default function Dashboard({
             <Head title="Dashboard Siswa" />
 
             {/* Attendance Chart Section */}
-            <section className="mb-6 rounded-3xl border border-sky-100 bg-white p-6 shadow-sm">
+            <section className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm sm:p-6">
                 <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
                         <h2 className="text-xl font-extrabold text-slate-800">
                             Grafik Kehadiran 7 Hari Terakhir
                         </h2>
                         <p className="text-sm text-slate-500">
-                            Grafik kehadiran otomatis berdasarkan data absen Anda setiap hari.
+                            Grafik naik-turun berdasarkan persentase kehadiran dan status absensi Anda.
                         </p>
                     </div>
 
-                    <div className="inline-flex rounded-2xl bg-sky-50 px-4 py-2">
-                        <span className="text-sm font-bold text-sky-700">
+                    <div className="w-fit rounded-2xl bg-cyan-50 px-4 py-2 text-sm font-bold text-cyan-700">
+                        <span>
                             Weekly Attendance
                         </span>
                     </div>
                 </div>
 
-                <div className="h-[300px] w-full lg:h-[400px]">
+                <div className="overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                    <div className="h-72 min-w-[640px] sm:h-80">
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart
                             data={chartData}
@@ -90,19 +105,20 @@ export default function Dashboard({
                                 type="monotone"
                                 dataKey="percentage"
                                 name="Persentase Hadir"
-                                stroke="#0284C7"
+                                stroke="#0E7490"
                                 strokeWidth={4}
-                                dot={{ r: 5, fill: "#FACC15", stroke: "#0284C7", strokeWidth: 2 }}
-                                activeDot={{ r: 8, fill: "#FACC15", stroke: "#0284C7", strokeWidth: 3 }}
+                                dot={{ r: 5, fill: "#FACC15", stroke: "#0E7490", strokeWidth: 2 }}
+                                activeDot={{ r: 8, fill: "#FACC15", stroke: "#0E7490", strokeWidth: 3 }}
                             />
                         </LineChart>
                     </ResponsiveContainer>
+                    </div>
                 </div>
 
                 {/* Day Summary Cards */}
-                <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-4">
+                <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-7">
                     {weeklyAttendance.map((item) => (
-                        <div key={item.date} className="rounded-2xl bg-sky-50 p-4">
+                        <div key={item.date} className="rounded-2xl bg-cyan-50 p-4">
                             <p className="text-sm font-bold text-slate-700">
                                 {item.day}, {item.label}
                             </p>

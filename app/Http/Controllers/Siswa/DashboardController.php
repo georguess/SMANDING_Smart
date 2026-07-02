@@ -44,7 +44,10 @@ class DashboardController extends Controller
                 ->where('status', 'alfa')
                 ->count();
 
-            $total = $hadir + $izin + $sakit + $alfa;
+            $recorded = $hadir + $izin + $sakit + $alfa;
+            $alphaMissing = max(1 - $recorded, 0);
+            $alpha = $alfa + $alphaMissing;
+            $total = 1;
 
             return [
                 'date' => $date->format('Y-m-d'),
@@ -53,9 +56,9 @@ class DashboardController extends Controller
                 'hadir' => $hadir,
                 'izin' => $izin,
                 'sakit' => $sakit,
-                'alfa' => $alfa,
+                'alfa' => $alpha,
                 'total' => $total,
-                'percentage' => $hadir > 0 ? 100 : 0,
+                'percentage' => round(($hadir / $total) * 100, 2),
             ];
         });
 

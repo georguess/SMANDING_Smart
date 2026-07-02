@@ -19,6 +19,7 @@ class AttendanceController extends Controller
             'uid_card' => ['required', 'string', 'max:100'],
             'rfid_reader_id' => ['nullable', 'exists:rfid_readers,id'],
             'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:4096'],
+            'image' => ['nullable', 'string'], // Base64 encoded image
         ]);
 
         $rfidCard = RfidCard::with(['siswa.kelas'])
@@ -73,8 +74,16 @@ class AttendanceController extends Controller
         $fotoPath = null;
 
         if ($request->hasFile('foto')) {
-            $fotoPath = $request->file('foto')->store('attendance-photos', 'public');
-        }
+        $fotoPath = $request->file('foto')->store('attendance-photos', 'public');
+    }   elseif ($request->filled('image')) {
+        \Log::info('Image diterima, panjang: ' . strlen($request->input('image')));
+        $imageData = base64_decode($request->input('image'));
+        \Log::info('Decode size: ' . strlen($imageData));
+        $filename = 'attendance-photos/' . $validated['uid_card'] . '_' . time() . '.jpg';
+        $result = Storage::disk('public')->put($filename, $imageData);
+        \Log::info('Storage result: ' . ($result ? 'OK' : 'GAGAL'));
+        $fotoPath = $filename;
+    }
 
         $today = now()->toDateString();
 
