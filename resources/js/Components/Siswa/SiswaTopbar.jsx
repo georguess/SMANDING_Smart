@@ -24,7 +24,7 @@ export default function SiswaTopbar({ title = "Dashboard", subtitle = "" }) {
                     <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-lg">
                         <div className="text-right">
                             <p className="text-sm font-bold text-slate-800">
-                                {user?.username || "Siswa"}
+                                {user?.siswa?.nama || user?.username || "Siswa"}
                             </p>
                             <p className="text-xs capitalize text-slate-500">
                                 {user?.role || "siswa"}
@@ -34,12 +34,12 @@ export default function SiswaTopbar({ title = "Dashboard", subtitle = "" }) {
                         {user?.photo_profile ? (
                             <img
                                 src={`/storage/${user.photo_profile}`}
-                                alt={user.username}
+                                alt={user?.siswa?.nama || user?.username || "Siswa"}
                                 className="h-11 w-11 rounded-full object-cover ring-2 ring-sky-200"
                             />
                         ) : (
                             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-sky-500 text-lg font-bold text-white">
-                                {(user?.username || "S").charAt(0).toUpperCase()}
+                                {(user?.siswa?.nama || user?.username || "S").charAt(0).toUpperCase()}
                             </div>
                         )}
                     </div>

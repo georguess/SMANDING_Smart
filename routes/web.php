@@ -194,6 +194,26 @@ Route::middleware(['auth', 'role:admin'])
         Route::patch('/semesters/{semester}/set-active', [SemesterController::class, 'setActive'])
             ->name('semesters.setActive');
     });
+    Route::middleware(['auth', 'role:siswa'])
+    ->prefix('siswa')
+    ->name('siswa.')
+    ->group(function () {
+
+        Route::get('/dashboard', [SiswaDashboardController::class, 'index'])
+            ->name('dashboard');
+
+        Route::get('/settings', [SiswaSettingController::class, 'edit'])
+            ->name('settings.edit');
+
+        Route::post('/settings/photo', [SiswaSettingController::class, 'updatePhoto'])
+            ->name('settings.photo');
+
+        Route::patch('/settings/profile', [SiswaSettingController::class, 'updateProfile'])
+            ->name('settings.profile');
+
+        Route::patch('/settings/password', [SiswaSettingController::class, 'updatePassword'])
+            ->name('settings.password');
+    });
 
 
 Route::get('/', [HomeController::class, 'index'])->name('Home');

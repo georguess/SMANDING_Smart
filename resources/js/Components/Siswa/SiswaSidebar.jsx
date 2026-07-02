@@ -81,18 +81,18 @@ export default function SiswaSidebar() {
                             {user?.photo_profile ? (
                                 <img
                                     src={`/storage/${user.photo_profile}`}
-                                    alt={user.username}
+                                    alt={user?.siswa?.nama || user.username}
                                     className="h-12 w-12 rounded-2xl object-cover"
                                 />
                             ) : (
                                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-lg font-extrabold text-cyan-700">
-                                    {user?.username?.charAt(0)?.toUpperCase() ?? "S"}
+                                    {(user?.siswa?.nama || user?.username || "S").charAt(0).toUpperCase()}
                                 </div>
                             )}
                         </div>
                         <div>
                             <p className="text-sm font-extrabold text-white">
-                                {user?.username}
+                                {user?.siswa?.nama || user?.username || "Siswa"}
                             </p>
                             <p className="text-xs text-white/80">
                                 Siswa

@@ -18,41 +18,67 @@ class DashboardController extends Controller
     {
         $activeSemester = Semester::orderByDesc('id')->first();
         $totalSiswa = Siswa::count();
-        $weeklyAttendance = collect(range(6, 0))->map(function ($day) use ($totalSiswa) {
-            $date = Carbon::now()->subDays($day);
 
-            $hadir = Attendance::whereDate('waktu_absen', $date)
+        $buildDailySummary = function (Carbon $date) use ($totalSiswa) {
+            $dateQuery = Attendance::whereDate('waktu_absen', $date);
+
+            $hadir = (clone $dateQuery)
                 ->where('status', 'hadir')
-                ->count();
+                ->distinct('siswa_id')
+                ->count('siswa_id');
 
-            $izin = Attendance::whereDate('waktu_absen', $date)
+            $izin = (clone $dateQuery)
                 ->where('status', 'izin')
-                ->count();
+                ->distinct('siswa_id')
+                ->count('siswa_id');
 
-            $sakit = Attendance::whereDate('waktu_absen', $date)
+            $sakit = (clone $dateQuery)
                 ->where('status', 'sakit')
-                ->count();
+                ->distinct('siswa_id')
+                ->count('siswa_id');
 
-            $alfa = Attendance::whereDate('waktu_absen', $date)
+            $alphaRecorded = (clone $dateQuery)
                 ->where('status', 'alfa')
-                ->count();
+                ->distinct('siswa_id')
+                ->count('siswa_id');
 
-            $total = $hadir + $izin + $sakit + $alfa;
+            $recordedStudents = (clone $dateQuery)
+                ->distinct('siswa_id')
+                ->count('siswa_id');
+
+            $alphaMissing = max($totalSiswa - $recordedStudents, 0);
+            $alfa = $alphaRecorded + $alphaMissing;
+
+            return [
+                'hadir' => $hadir,
+                'izin' => $izin,
+                'sakit' => $sakit,
+                'alfa' => $alfa,
+                'total' => $totalSiswa,
+                'percentage' => $totalSiswa > 0
+                    ? round(($hadir / $totalSiswa) * 100, 2)
+                    : 0,
+            ];
+        };
+
+        $weeklyAttendance = collect(range(6, 0))->map(function ($day) use ($totalSiswa, $buildDailySummary) {
+            $date = Carbon::now()->subDays($day);
+            $summary = $buildDailySummary($date);
 
             return [
                 'date' => $date->format('Y-m-d'),
                 'day' => $date->translatedFormat('D'),
                 'label' => $date->translatedFormat('d M'),
-                'hadir' => $hadir,
-                'izin' => $izin,
-                'sakit' => $sakit,
-                'alfa' => $alfa,
-                'total' => $total,
-                'percentage' => $totalSiswa > 0
-                    ? round(($hadir / $totalSiswa) * 100, 2)
-                    : 0,
+                'hadir' => $summary['hadir'],
+                'izin' => $summary['izin'],
+                'sakit' => $summary['sakit'],
+                'alfa' => $summary['alfa'],
+                'total' => $summary['total'],
+                'percentage' => $summary['percentage'],
             ];
         });
+
+        $todaySummary = $buildDailySummary(today());
 
         return Inertia::render('Admin/Dashboard',  [
             'totalStudents' => Siswa::count(),
@@ -61,21 +87,11 @@ class DashboardController extends Controller
             'totalAdmins' => User::where('role', 'admin')->count(),
 
             'todayAttendance' => [
-                'hadir' => Attendance::whereDate('waktu_absen', today())
-                    ->where('status', 'hadir')
-                    ->count(),
-
-                'izin' => Attendance::whereDate('waktu_absen', today())
-                    ->where('status', 'izin')
-                    ->count(),
-
-                'sakit' => Attendance::whereDate('waktu_absen', today())
-                    ->where('status', 'sakit')
-                    ->count(),
-
-                'alfa' => Attendance::whereDate('waktu_absen', today())
-                    ->where('status', 'alfa')
-                    ->count(),
+                'hadir' => $todaySummary['hadir'],
+                'izin' => $todaySummary['izin'],
+                'sakit' => $todaySummary['sakit'],
+                'alfa' => $todaySummary['alfa'],
+                'percentage' => $todaySummary['percentage'],
             ],
             'activeSemester' => $activeSemester,
             'weeklyAttendance' => $weeklyAttendance,
