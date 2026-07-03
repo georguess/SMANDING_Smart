@@ -106,7 +106,7 @@ class AttendanceController extends Controller
                     'semester' => $existingAttendance->semester
                     ? $existingAttendance->semester->semester . ' - ' . $existingAttendance->semester->tahun_akademik
                     : null,
-                    'waktu_absen' => $existingAttendance->waktu_absen,
+                    'waktu_absen' => $existingAttendance->waktu_absen->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s'),
                     'status_absensi' => $existingAttendance->status,
                     'foto' => $existingAttendance->foto
                         ? asset('storage/' . $existingAttendance->foto)
@@ -143,7 +143,7 @@ class AttendanceController extends Controller
                 'semester' => $attendance->semester
                 ? $attendance->semester->semester . ' - ' . $attendance->semester->tahun_akademik
                 : null,
-                'waktu_absen' => $attendance->waktu_absen,
+                'waktu_absen' => $attendance->waktu_absen->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s'),
                 'status_absensi' => $attendance->status,
                 'foto' => $attendance->foto
                     ? asset('storage/' . $attendance->foto)
@@ -165,7 +165,7 @@ class AttendanceController extends Controller
                     'nis' => $attendance->siswa?->nis,
                     'kelas' => $attendance->kelas?->nama_kelas,
                     'reader' => $attendance->rfidReader?->lokasi,
-                    'waktu_absen' => $attendance->waktu_absen,
+                    'waktu_absen' => $attendance->waktu_absen->setTimezone('Asia/Jakarta')->format('Y-m-d H:i:s'),
                     'status' => $attendance->status,
                     'foto' => $attendance->foto
                         ? asset('storage/' . $attendance->foto)
