@@ -26,6 +26,7 @@ class User extends Authenticatable
         'birth_date',
         'photo_profile',
         'is_active',
+        'must_change_password',
     ];
 
     /**
@@ -44,10 +45,11 @@ class User extends Authenticatable
      * @var array<string, string>
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'birth_date' =>'date',
-        'password' => 'hashed',
-        'is_active' => 'boolean',
+        'email_verified_at'    => 'datetime',
+        'birth_date'           => 'date',
+        'password'             => 'hashed',
+        'is_active'            => 'boolean',
+        'must_change_password' => 'boolean',
     ];
 
     public function siswa(){

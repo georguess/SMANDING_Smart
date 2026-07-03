@@ -7,6 +7,7 @@ import {
     RiSettings3Line,
     RiLogoutBoxRLine,
 } from "@remixicon/react";
+import AlertCard from "@/Components/AlertCard";
 
 export default function GuruLayout({ title = "Dashboard Guru", children }) {
     const { auth } = usePage().props;
@@ -210,6 +211,7 @@ export default function GuruLayout({ title = "Dashboard Guru", children }) {
                     </header>
 
                     <main className="min-h-[calc(100vh-5rem)] bg-cyan-50 p-3 sm:p-5 md:min-h-[calc(100vh-6rem)] md:p-8">
+                        <AlertCard/>
                         {children}
                     </main>
                 </div>

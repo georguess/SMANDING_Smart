@@ -1,6 +1,7 @@
 import React from "react";
 import SiswaSidebar from "@/Components/Siswa/SiswaSidebar";
 import SiswaTopbar from "@/Components/Siswa/SiswaTopbar";
+import AlertCard from "@/Components/AlertCard";
 
 export default function SiswaLayout({
     children,
@@ -15,6 +16,7 @@ export default function SiswaLayout({
                 <SiswaTopbar title={title} subtitle={subtitle} />
 
                 <main className="p-6">
+                    <AlertCard/>
                     {children}
                 </main>
             </div>

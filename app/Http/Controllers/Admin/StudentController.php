@@ -85,22 +85,23 @@ class StudentController extends Controller
             }
 
             $user = User::create([
-                'username' => $validated['nisn'],
-                'email' => $validated['email'],
-                'password' => Hash::make(self::DEFAULT_PASSWORD),
-                'role' => 'siswa',
-                'photo_profile' => $photoPath,
-                'birth_date' => $validated['birth_date'],
-                'is_active' => $validated['is_active'],
+                'username'             => $validated['nama'],
+                'email'                => $validated['email'],
+                'password'             => Hash::make('Smanding@26'),
+                'role'                 => 'siswa',
+                'photo_profile'        => $photoPath,
+                'birth_date'           => $validated['birth_date'],
+                'is_active'            => $validated['is_active'],
+                'must_change_password' => true,
             ]);
 
             Siswa::create([
-                'user_id' => $user->id,
+                'user_id'  => $user->id,
                 'kelas_id' => $validated['kelas_id'],
-                'nama' => $validated['nama'],
-                'nis' => $validated['nis'],
-                'nisn' => $validated['nisn'] ?? null,
-                'alamat' => $validated['alamat'] ?? null,
+                'nama'     => $validated['nama'],
+                'nis'      => $validated['nis'],
+                'nisn'     => $validated['nisn'] ?? null,
+                'alamat'   => $validated['alamat'] ?? null,
             ]);
         });
 
@@ -212,11 +213,12 @@ class StudentController extends Controller
         $student->load('user');
 
         if (!$student->user) {
-            return back()->with('error', 'Data siswa belum lengkap.');
+            return back()->with('error', 'Data user siswa tidak ditemukan.');
         }
 
         $student->user->update([
-            'password' => Hash::make(self::DEFAULT_PASSWORD),
+            'password'             => Hash::make('Smanding@26'),
+            'must_change_password' => true,
         ]);
 
         return back()->with('success', 'Password siswa berhasil direset ke password default.');

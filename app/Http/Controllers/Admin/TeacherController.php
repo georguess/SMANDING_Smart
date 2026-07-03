@@ -74,23 +74,21 @@ class TeacherController extends Controller
                 $photoPath = $request->file('photo_profile')->store('profile/guru', 'public');
             }
 
-            $defaultPassword = Carbon::parse($validated['birth_date'])->format('dmY');
-
             $user = User::create([
-                'username' => $validated['username'],
-                'email' => $validated['email'],
-                'password' => Hash::make($defaultPassword),
-                'role' => 'guru',
+                'username'      => $validated['username'],
+                'email'         => $validated['email'],
+                'password'      => Hash::make('Smanding@26'),
+                'role'          => 'guru',
                 'photo_profile' => $photoPath,
-                'birth_date' => $validated['birth_date'],
-                'is_active' => $validated['is_active'] === '1',
+                'birth_date'    => $validated['birth_date'],
+                'is_active'     => $validated['is_active'] === '1',
             ]);
 
             Guru::create([
                 'user_id' => $user->id,
-                'nama' => $validated['nama'],
-                'nip' => $validated['nip'],
-                'alamat' => $validated['alamat'] ?? null,
+                'nama'    => $validated['nama'],
+                'nip'     => $validated['nip'],
+                'alamat'  => $validated['alamat'] ?? null,
             ]);
         });
 
@@ -202,16 +200,14 @@ class TeacherController extends Controller
     {
         $teacher->load('user');
 
-        if (!$teacher->user || !$teacher->user->birth_date) {
-            return back()->with('error', 'Tanggal lahir guru belum tersedia.');
+        if (!$teacher->user) {
+            return back()->with('error', 'Data user guru tidak ditemukan.');
         }
 
-        $defaultPassword = Carbon::parse($teacher->user->birth_date)->format('dmY');
-
         $teacher->user->update([
-            'password' => Hash::make($defaultPassword),
+            'password' => Hash::make('Smanding@26'),
         ]);
 
-        return back()->with('success', 'Password guru berhasil direset ke tanggal lahir.');
+        return back()->with('success', 'Password guru berhasil direset ke password default.');
     }
 }
