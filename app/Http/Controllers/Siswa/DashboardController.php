@@ -20,34 +20,25 @@ class DashboardController extends Controller
             abort(404, "Data siswa tidak ditemukan untuk akun ini.");
         }
 
-        // Ambil data absensi 1 minggu terakhir untuk Siswa
+                // Ambil data absensi 1 minggu terakhir untuk Siswa
         $weeklyAttendance = collect(range(6, 0))->map(function ($day) use ($siswa) {
             $date = Carbon::now()->subDays($day);
 
-            $hadir = Attendance::where('siswa_id', $siswa->id)
-                ->whereDate('waktu_absen', $date)
-                ->where('status', 'hadir')
-                ->count();
+            // Buat base query untuk 1 siswa pada tanggal ini
+            $dateQuery = Attendance::where('siswa_id', $siswa->id)
+                ->whereDate('waktu_absen', $date);
 
-            $izin = Attendance::where('siswa_id', $siswa->id)
-                ->whereDate('waktu_absen', $date)
-                ->where('status', 'izin')
-                ->count();
+            $hadir = (clone $dateQuery)->where('status', 'hadir')->count();
+            $izin = (clone $dateQuery)->where('status', 'izin')->count();
+            $sakit = (clone $dateQuery)->where('status', 'sakit')->count();
+            $alfaTercatat = (clone $dateQuery)->where('status', 'alfa')->count();
 
-            $sakit = Attendance::where('siswa_id', $siswa->id)
-                ->whereDate('waktu_absen', $date)
-                ->where('status', 'sakit')
-                ->count();
-
-            $alfa = Attendance::where('siswa_id', $siswa->id)
-                ->whereDate('waktu_absen', $date)
-                ->where('status', 'alfa')
-                ->count();
-
-            $recorded = $hadir + $izin + $sakit + $alfa;
-            $alphaMissing = max(1 - $recorded, 0);
-            $alpha = $alfa + $alphaMissing;
-            $total = 1;
+            // Hitung apakah hari ini siswa tersebut ada history absen (Hadir/Sakit/Izin/Alfa Manual)
+            $recorded = $hadir + $izin + $sakit + $alfaTercatat;
+            
+            // Jika tidak ada history sama sekali (0), maka dia Alfa
+            $alfaTidakTap = max(1 - $recorded, 0);
+            $alfa = $alfaTercatat + $alfaTidakTap;
 
             return [
                 'date' => $date->format('Y-m-d'),
@@ -56,9 +47,9 @@ class DashboardController extends Controller
                 'hadir' => $hadir,
                 'izin' => $izin,
                 'sakit' => $sakit,
-                'alfa' => $alpha,
-                'total' => $total,
-                'percentage' => round(($hadir / $total) * 100, 2),
+                'alfa' => $alfa,
+                'total' => 1,
+                'percentage' => $hadir > 0 ? 100 : 0,
             ];
         });
 

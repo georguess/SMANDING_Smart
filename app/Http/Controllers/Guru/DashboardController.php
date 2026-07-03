@@ -45,10 +45,21 @@ class DashboardController extends Controller
             ->where('status', 'sakit')
             ->count();
 
-        $alfaHariIni = Attendance::whereIn('kelas_id', $kelasIds)
+        // Hitung alfa yang masuk database (manual)
+        $alfaTercatat = Attendance::whereIn('kelas_id', $kelasIds)
             ->whereDate('waktu_absen', today())
             ->where('status', 'alfa')
             ->count();
+
+        // Hitung total siswa yang sudah absen (Hadir + Sakit + Izin + Alfa Manual)
+        $siswaSudahAbsen = Attendance::whereIn('kelas_id', $kelasIds)
+            ->whereDate('waktu_absen', today())
+            ->distinct('siswa_id')
+            ->count('siswa_id');
+
+        // Hitung yang tidak absen sama sekali, lalu tambahkan ke Alfa
+        $alfaTidakTap = max($totalSiswa - $siswaSudahAbsen, 0);
+        $alfaHariIni = $alfaTercatat + $alfaTidakTap;
 
         $persentaseHadir = $totalSiswa > 0
             ? round(($hadirHariIni / $totalSiswa) * 100, 1)
@@ -66,37 +77,50 @@ class DashboardController extends Controller
                 ];
             });
 
-        $weeklyAttendance = collect(range(6, 0))->map(function ($day) use ($kelasIds) {
+        $weeklyAttendance = collect(range(6, 0))->map(function ($day) use ($kelasIds, $totalSiswa) {
             $date = now()->subDays($day);
 
-            $hadir = Attendance::whereIn('kelas_id', $kelasIds)
-                ->whereDate('waktu_absen', $date)
+            // Buat query dasar untuk kelas-kelas guru ini pada tanggal tersebut
+            $dateQuery = Attendance::whereIn('kelas_id', $kelasIds)
+                ->whereDate('waktu_absen', $date);
+
+            $hadir = (clone $dateQuery)
                 ->where('status', 'hadir')
-                ->count();
+                ->distinct('siswa_id')
+                ->count('siswa_id');
 
-            $izin = Attendance::whereIn('kelas_id', $kelasIds)
-                ->whereDate('waktu_absen', $date)
+            $izin = (clone $dateQuery)
                 ->where('status', 'izin')
-                ->count();
+                ->distinct('siswa_id')
+                ->count('siswa_id');
 
-            $sakit = Attendance::whereIn('kelas_id', $kelasIds)
-                ->whereDate('waktu_absen', $date)
+            $sakit = (clone $dateQuery)
                 ->where('status', 'sakit')
-                ->count();
+                ->distinct('siswa_id')
+                ->count('siswa_id');
 
-            $alfa = Attendance::whereIn('kelas_id', $kelasIds)
-                ->whereDate('waktu_absen', $date)
+            $alfaTercatat = (clone $dateQuery)
                 ->where('status', 'alfa')
-                ->count();
+                ->distinct('siswa_id')
+                ->count('siswa_id');
+
+            // Menghitung berapa banyak siswa yang punya data absen hari itu
+            $siswaSudahAbsen = (clone $dateQuery)
+                ->distinct('siswa_id')
+                ->count('siswa_id');
+
+            // Siswa yang hilang/tidak tap dihitung sebagai Alfa
+            $alfaTidakTap = max($totalSiswa - $siswaSudahAbsen, 0);
+            $alfa = $alfaTercatat + $alfaTidakTap;
 
             return [
                 'tanggal' => $date->format('Y-m-d'),
-                'label' => $date->format('d M'),
-                'hadir' => $hadir,
-                'izin' => $izin,
-                'sakit' => $sakit,
-                'alfa' => $alfa,
-                'total' => $hadir + $izin + $sakit + $alfa,
+                'label'   => $date->format('d M'),
+                'hadir'   => $hadir,
+                'izin'    => $izin,
+                'sakit'   => $sakit,
+                'alfa'    => $alfa,
+                'total'   => $totalSiswa,
             ];
         });
 
