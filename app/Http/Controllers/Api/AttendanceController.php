@@ -10,6 +10,7 @@ use App\Models\Semester;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class AttendanceController extends Controller
 {
@@ -76,12 +77,12 @@ class AttendanceController extends Controller
         if ($request->hasFile('foto')) {
         $fotoPath = $request->file('foto')->store('attendance-photos', 'public');
     }   elseif ($request->filled('image')) {
-        \Log::info('Image diterima, panjang: ' . strlen($request->input('image')));
+        Log::info('Image diterima, panjang: ' . strlen($request->input('image')));
         $imageData = base64_decode($request->input('image'));
-        \Log::info('Decode size: ' . strlen($imageData));
+        Log::info('Decode size: ' . strlen($imageData));
         $filename = 'attendance-photos/' . $validated['uid_card'] . '_' . time() . '.jpg';
         $result = Storage::disk('public')->put($filename, $imageData);
-        \Log::info('Storage result: ' . ($result ? 'OK' : 'GAGAL'));
+        Log::info('Storage result: ' . ($result ? 'OK' : 'GAGAL'));
         $fotoPath = $filename;
     }
 
@@ -115,6 +116,17 @@ class AttendanceController extends Controller
             ]);
         }
 
+        // mengecek waktu saat ini di zona waktu jakarta
+        $now = now()->setTimezone('Asia/Jakaerta');
+        $waktuabsen = $now->format('H:i');
+
+        if ($waktuabsen >= '5:30' && $waktuabsen <= '7:15'){
+            $StatusAbsen = 'hadir';
+        }else{
+            $StatusAbsen = 'alfa';
+        }
+
+
         $attendance = Attendance::create([
             'user_id' => $siswa->user_id,
             'siswa_id' => $siswa->id,
@@ -124,7 +136,7 @@ class AttendanceController extends Controller
             'rfid_reader_id' => $validated['rfid_reader_id'] ?? null,
             'guru_id' => $siswa->kelas?->guru_id,
             'waktu_absen' => now(),
-            'status' => 'hadir',
+            'status' => $StatusAbsen,
             'foto' => $fotoPath,
         ]);
 
