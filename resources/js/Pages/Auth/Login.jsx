@@ -114,16 +114,14 @@ export default function Login({ status, canResetPassword }) {
                                             SMANDING
                                         </h1>
                                         <p className="text-xs font-medium text-slate-500">
-                                            Smart Attendance System
+                                            SMA N 1 GADINGREJO
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="mb-8">
-                                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-700 text-2xl text-white shadow-md">
-                                    <RiLockPasswordLine size={34}/>
-                                </div>
+                            
 
                                 <h2 className="text-3xl font-extrabold text-slate-800">
                                     Selamat Datang
@@ -147,7 +145,7 @@ export default function Login({ status, canResetPassword }) {
                                         htmlFor="login"
                                         className="mb-2 block text-sm font-bold text-slate-700"
                                     >
-                                        NISN / Username / Email
+                                        NIS / Username / Email
                                     </label>
 
                                     <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition focus-within:border-sky-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-sky-100">
@@ -167,7 +165,7 @@ export default function Login({ status, canResetPassword }) {
                                                 )
                                             }
                                             autoComplete="username"
-                                            placeholder="Masukkan NISN, username, atau email"
+                                            placeholder="Masukkan NIS, username, atau email"
                                             className="w-full border-none bg-transparent p-0 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:ring-0"
                                         />
                                     </div>
