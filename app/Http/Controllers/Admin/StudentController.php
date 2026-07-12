@@ -85,7 +85,7 @@ class StudentController extends Controller
             }
 
             $user = User::create([
-                'username'             => $validated['nama'],
+                'username'             => $validated['nis'],
                 'email'                => $validated['email'],
                 'password'             => Hash::make('Smanding@26'),
                 'role'                 => 'siswa',
@@ -166,7 +166,7 @@ class StudentController extends Controller
             }
 
             $student->user->update([
-                'username' => $validated['nisn'],
+                'username' => $validated['nis'],
                 'email' => $validated['email'],
                 'photo_profile' => $photoPath,
                 'birth_date' => $validated['birth_date'],
