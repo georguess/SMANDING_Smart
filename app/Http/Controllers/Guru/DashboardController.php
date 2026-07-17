@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Attendance;
 use App\Models\Kelas;
 use App\Models\Siswa;
+use App\Services\AttendanceService;
+use Carbon\Carbon;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -13,117 +15,65 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-
         $guru = $user->guru;
 
         if (!$guru) {
             abort(403, 'Data guru tidak ditemukan untuk akun ini.');
         }
 
-        $kelasIds = Kelas::where('guru_id', $guru->id)->pluck('id');
-
+        $kelasIds   = Kelas::where('guru_id', $guru->id)->pluck('id');
         $totalKelas = $kelasIds->count();
-
         $totalSiswa = Siswa::whereIn('kelas_id', $kelasIds)->count();
 
+        $kelasIdsArray = $kelasIds->toArray();
+
+        // Ringkasan hari ini menggunakan service
+        $todaySummary = AttendanceService::buildDailySummary(
+            today(), $totalSiswa, $kelasIdsArray
+        );
+
+        // Total record absensi hari ini (masuk + pulang)
         $absensiHariIni = Attendance::whereIn('kelas_id', $kelasIds)
-            ->whereDate('waktu_absen', today())
+            ->where('tanggal', today()->toDateString())
             ->count();
 
-        $hadirHariIni = Attendance::whereIn('kelas_id', $kelasIds)
-            ->whereDate('waktu_absen', today())
-            ->where('status', 'hadir')
-            ->count();
+        $persentaseHadir = $todaySummary['percentage'];
 
-        $izinHariIni = Attendance::whereIn('kelas_id', $kelasIds)
-            ->whereDate('waktu_absen', today())
-            ->where('status', 'izin')
-            ->count();
-
-        $sakitHariIni = Attendance::whereIn('kelas_id', $kelasIds)
-            ->whereDate('waktu_absen', today())
-            ->where('status', 'sakit')
-            ->count();
-
-        // Hitung alfa yang masuk database (manual)
-        $alfaTercatat = Attendance::whereIn('kelas_id', $kelasIds)
-            ->whereDate('waktu_absen', today())
-            ->where('status', 'alfa')
-            ->count();
-
-        // Hitung total siswa yang sudah absen (Hadir + Sakit + Izin + Alfa Manual)
-        $siswaSudahAbsen = Attendance::whereIn('kelas_id', $kelasIds)
-            ->whereDate('waktu_absen', today())
-            ->distinct('siswa_id')
-            ->count('siswa_id');
-
-        // Hitung yang tidak absen sama sekali, lalu tambahkan ke Alfa
-        $alfaTidakTap = max($totalSiswa - $siswaSudahAbsen, 0);
-        $alfaHariIni = $alfaTercatat + $alfaTidakTap;
-
-        $persentaseHadir = $totalSiswa > 0
-            ? round(($hadirHariIni / $totalSiswa) * 100, 1)
-            : 0;
-
+        // Daftar kelas perwalian
         $kelasWali = Kelas::where('guru_id', $guru->id)
+            ->withCount(['siswas as jumlah_siswa'])
+            ->withCount(['attendances as absensi_hari_ini' => function ($query) {
+                $query->where('tanggal', today()->toDateString());
+            }])
             ->orderBy('nama_kelas')
             ->get()
             ->map(function ($kelas) {
                 return [
-                    'id' => $kelas->id,
-                    'nama_kelas' => $kelas->nama_kelas,
-                    'tahun_ajaran' => $kelas->tahun_ajaran,
-                    'jumlah_siswa' => Siswa::where('kelas_id', $kelas->id)->count(),
+                    'id'                => $kelas->id,
+                    'nama_kelas'        => $kelas->nama_kelas,
+                    'tahun_ajaran'      => $kelas->tahun_ajaran,
+                    'jumlah_siswa'      => $kelas->jumlah_siswa ?? 0,
+                    'absensi_hari_ini'  => $kelas->absensi_hari_ini ?? 0,
                 ];
             });
 
-        $weeklyAttendance = collect(range(6, 0))->map(function ($day) use ($kelasIds, $totalSiswa) {
-            $date = now()->subDays($day);
-
-            // Buat query dasar untuk kelas-kelas guru ini pada tanggal tersebut
-            $dateQuery = Attendance::whereIn('kelas_id', $kelasIds)
-                ->whereDate('waktu_absen', $date);
-
-            $hadir = (clone $dateQuery)
-                ->where('status', 'hadir')
-                ->distinct('siswa_id')
-                ->count('siswa_id');
-
-            $izin = (clone $dateQuery)
-                ->where('status', 'izin')
-                ->distinct('siswa_id')
-                ->count('siswa_id');
-
-            $sakit = (clone $dateQuery)
-                ->where('status', 'sakit')
-                ->distinct('siswa_id')
-                ->count('siswa_id');
-
-            $alfaTercatat = (clone $dateQuery)
-                ->where('status', 'alfa')
-                ->distinct('siswa_id')
-                ->count('siswa_id');
-
-            // Menghitung berapa banyak siswa yang punya data absen hari itu
-            $siswaSudahAbsen = (clone $dateQuery)
-                ->distinct('siswa_id')
-                ->count('siswa_id');
-
-            // Siswa yang hilang/tidak tap dihitung sebagai Alfa
-            $alfaTidakTap = max($totalSiswa - $siswaSudahAbsen, 0);
-            $alfa = $alfaTercatat + $alfaTidakTap;
+        // Grafik 7 hari terakhir
+        $weeklyAttendance = collect(range(6, 0))->map(function ($day) use ($kelasIdsArray, $totalSiswa) {
+            $date    = Carbon::now()->subDays($day);
+            $summary = AttendanceService::buildDailySummary($date, $totalSiswa, $kelasIdsArray);
 
             return [
-                'tanggal' => $date->format('Y-m-d'),
-                'label'   => $date->format('d M'),
-                'hadir'   => $hadir,
-                'izin'    => $izin,
-                'sakit'   => $sakit,
-                'alfa'    => $alfa,
-                'total'   => $totalSiswa,
+                'tanggal'    => $date->format('Y-m-d'),
+                'label'      => $date->format('d M'),
+                'hadir'      => $summary['hadir'],
+                'izin'       => $summary['izin'],
+                'sakit'      => $summary['sakit'],
+                'alfa'       => $summary['alfa'],
+                'total'      => $summary['total'],
             ];
         });
 
+        // 30 absensi terbaru
         $latestAttendances = Attendance::with(['siswa', 'kelas'])
             ->whereIn('kelas_id', $kelasIds)
             ->latest('waktu_absen')
@@ -131,30 +81,31 @@ class DashboardController extends Controller
             ->get()
             ->map(function ($attendance) {
                 return [
-                    'id' => $attendance->id,
-                    'nama_siswa' => $attendance->siswa?->nama ?? '-',
-                    'kelas' => $attendance->kelas?->nama_kelas ?? '-',
-                    'status' => $attendance->status,
+                    'id'          => $attendance->id,
+                    'nama_siswa'  => $attendance->siswa?->nama ?? '-',
+                    'kelas'       => $attendance->kelas?->nama_kelas ?? '-',
+                    'tipe'        => $attendance->tipe,
+                    'status'      => $attendance->status,
                     'waktu_absen' => $attendance->waktu_absen
                         ? $attendance->waktu_absen->format('d M Y H:i')
                         : '-',
-                    'foto' => $attendance->foto,
+                    'foto'        => $attendance->foto,
                 ];
             });
 
         return Inertia::render('Guru/Dashboard', [
             'summary' => [
-                'total_kelas' => $totalKelas,
-                'total_siswa' => $totalSiswa,
-                'absensi_hari_ini' => $absensiHariIni,
-                'hadir_hari_ini' => $hadirHariIni,
-                'izin_hari_ini' => $izinHariIni,
-                'sakit_hari_ini' => $sakitHariIni,
-                'alfa_hari_ini' => $alfaHariIni,
-                'persentase_hadir' => $persentaseHadir,
+                'total_kelas'       => $totalKelas,
+                'total_siswa'       => $totalSiswa,
+                'absensi_hari_ini'  => $absensiHariIni,
+                'hadir_hari_ini'    => $todaySummary['hadir'],
+                'izin_hari_ini'     => $todaySummary['izin'],
+                'sakit_hari_ini'    => $todaySummary['sakit'],
+                'alfa_hari_ini'     => $todaySummary['alfa'],
+                'persentase_hadir'  => $persentaseHadir,
             ],
-            'kelasWali' => $kelasWali,
-            'weeklyAttendance' => $weeklyAttendance,
+            'kelasWali'         => $kelasWali,
+            'weeklyAttendance'  => $weeklyAttendance,
             'latestAttendances' => $latestAttendances,
         ]);
     }

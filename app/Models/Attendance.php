@@ -18,12 +18,15 @@ class Attendance extends Model
         'semester_id',
         'siswa_id',
         'waktu_absen',
+        'tanggal',
         'status',
+        'tipe',
         'foto',
     ];
 
     protected $casts = [
         'waktu_absen' => 'datetime',
+        'tanggal'     => 'date',
     ];
 
     public function user()
@@ -59,10 +62,5 @@ class Attendance extends Model
     public function rfidReader()
     {
         return $this->belongsTo(RfidReader::class, 'rfid_reader_id');
-    }
-
-     public function markedBy()
-    {
-        return $this->belongsTo(User::class, 'marked_by');
     }
 }

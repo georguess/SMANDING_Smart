@@ -111,6 +111,8 @@ class DatabaseSeeder extends Seeder
             'rfid_reader_id' => $reader->id,
             'guru_id' => $guru->id,
             'waktu_absen' => now()->subHours(2),
+            'tanggal' => now()->toDateString(),
+            'tipe' => 'masuk',
             'status' => 'hadir',
             'foto' => null,
         ]);

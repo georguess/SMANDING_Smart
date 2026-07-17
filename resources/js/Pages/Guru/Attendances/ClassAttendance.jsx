@@ -14,6 +14,7 @@ export default function ClassAttendance({
     const [bulan, setBulan] = useState(filters.bulan || new Date().getMonth() + 1);
     const [tahun, setTahun] = useState(filters.tahun || new Date().getFullYear());
     const [semesterId, setSemesterId] = useState(filters.semester_id || "");
+    const [tipe, setTipe] = useState(filters.tipe || "");
 
     const attendanceData = attendances?.data ?? [];
     const attendanceLinks = attendances?.links ?? [];
@@ -29,6 +30,7 @@ export default function ClassAttendance({
                 bulan,
                 tahun,
                 semester_id: semesterId,
+                tipe,
             },
             {
                 preserveState: true,
@@ -87,20 +89,21 @@ export default function ClassAttendance({
     };
 
     const isTerlambat = (item) => {
-    if (!item?.waktu_absen) return false;
+        if (!item?.waktu_absen) return false;
+        
+        // Hanya absen "masuk" yang bisa terlambat
+        if (item.tipe === "pulang") return false;
+        if (String(item.status).toLowerCase() !== "hadir") return false;
 
-    if (String(item.status).toLowerCase() !== "hadir") return false;
+        const waktu = new Date(item.waktu_absen);
+        const jamMasuk = 7;
+        const menitMasuk = 15; // Terlambat jika lewat 07:15
 
-    const waktu = new Date(item.waktu_absen);
-
-    const jamMasuk = 7;
-    const menitMasuk = 0;
-
-    return (
-        waktu.getHours() > jamMasuk ||
-        (waktu.getHours() === jamMasuk && waktu.getMinutes() > menitMasuk)
-    );
-};
+        return (
+            waktu.getHours() > jamMasuk ||
+            (waktu.getHours() === jamMasuk && waktu.getMinutes() > menitMasuk)
+        );
+    };
 
 const getStatusLabel = (item) => {
     const itemStatus = String(item.status).toLowerCase();
@@ -111,6 +114,18 @@ const getStatusLabel = (item) => {
 
     return itemStatus.charAt(0).toUpperCase() + itemStatus.slice(1);
 };
+
+const tipeBadge = (tipe) => {
+        if (tipe === "masuk") return "bg-blue-100 text-blue-700";
+        if (tipe === "pulang") return "bg-purple-100 text-purple-700";
+        return "bg-gray-100 text-gray-500";
+    };
+
+const tipeLabel = (tipe) => {
+        if (tipe === "masuk") return "Masuk";
+        if (tipe === "pulang") return "Pulang";
+        return "-";
+    };
 
 const getStatusBadge = (item) => {
     const itemStatus = String(item.status).toLowerCase();
@@ -175,7 +190,7 @@ const getStatusBadge = (item) => {
 
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex">
                         <a
-                            href={`/guru/attendances/classes/${kelas.id}/export-csv?status=${status}&bulan=${bulan}&tahun=${tahun}&semester_id=${semesterId}`}
+                            href={`/guru/attendances/classes/${kelas.id}/export-csv?bulan=${bulan}&tahun=${tahun}&status=${status}&semesterId=${semesterId}&tipe=${tipe}`}
                             className="rounded-xl bg-green-600 px-5 py-3 text-center font-semibold text-white transition hover:bg-green-700"
                         >
                             Export Excel
@@ -237,15 +252,13 @@ const getStatusBadge = (item) => {
                         </select>
 
                         <select
-                            value={bulan}
-                            onChange={(e) => setBulan(e.target.value)}
+                            value={tipe}
+                            onChange={(e) => setTipe(e.target.value)}
                             className="rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100 sm:text-base"
                         >
-                            {bulanList.map((item) => (
-                                <option key={item.value} value={item.value}>
-                                    {item.label}
-                                </option>
-                            ))}
+                            <option value="">Semua Sesi</option>
+                            <option value="masuk">Masuk</option>
+                            <option value="pulang">Pulang</option>
                         </select>
 
                         <input
@@ -371,6 +384,7 @@ const getStatusBadge = (item) => {
                                     <th className="p-3">No</th>
                                     <th className="p-3">Nama Siswa</th>
                                     <th className="p-3">NIS</th>
+                                    <th className="p-3">Sesi</th>
                                     <th className="p-3">Tanggal/Waktu</th>
                                     <th className="p-3">Status</th>
                                     <th className="p-3">Foto</th>
@@ -389,6 +403,15 @@ const getStatusBadge = (item) => {
                                             </td>
                                             <td className="p-3">
                                                 {item.siswa?.nis ?? "-"}
+                                            </td>
+                                            <td className="px-3">
+                                                <span
+                                                    className={`rounded-full px-3 py-1 text-xs font-semibold ${tipeBadge(
+                                                        item.tipe
+                                                    )}`}
+                                                >
+                                                    {tipeLabel(item.tipe)}
+                                                </span>
                                             </td>
                                             <td className="p-3">
                                                 {formatTanggal(item.waktu_absen)}

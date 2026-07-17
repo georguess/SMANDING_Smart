@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Attendance;
 use App\Models\Guru;
 use App\Models\Kelas;
 use App\Models\Semester;
 use App\Models\Siswa;
+use App\Services\AttendanceService;
 use Carbon\Carbon;
 use Inertia\Inertia;
 
@@ -14,66 +14,32 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $totalSiswa = Siswa::count();
-        $activeSemester = Semester::orderByDesc('id')->first();
+        $totalSiswa     = Siswa::count();
+        $activeSemester = Semester::where('is_active', true)->first();
 
-        $buildDailySummary = function (Carbon $date) use ($totalSiswa) {
-            $dateQuery = Attendance::whereDate('waktu_absen', $date);
-
-            $hadir = (clone $dateQuery)
-                ->where('status', 'hadir')
-                ->distinct('siswa_id')
-                ->count('siswa_id');
-
-            $izin = (clone $dateQuery)
-                ->where('status', 'izin')
-                ->distinct('siswa_id')
-                ->count('siswa_id');
-
-            $sakit = (clone $dateQuery)
-                ->where('status', 'sakit')
-                ->distinct('siswa_id')
-                ->count('siswa_id');
-
-            $alphaRecorded = (clone $dateQuery)
-                ->where('status', 'alfa')
-                ->distinct('siswa_id')
-                ->count('siswa_id');
-
-            $recordedStudents = (clone $dateQuery)
-                ->distinct('siswa_id')
-                ->count('siswa_id');
-
-            // Hitung siswa yang tidak tap sama sekali sebagai Alfa
-            $alphaMissing = max($totalSiswa - $recordedStudents, 0);
-            $alfa = $alphaRecorded + $alphaMissing;
+        $weeklyAttendance = collect(range(6, 0))->map(function ($day) use ($totalSiswa) {
+            $date    = Carbon::now()->subDays($day);
+            $summary = AttendanceService::buildDailySummary($date, $totalSiswa);
 
             return [
-                'date' => $date->format('Y-m-d'),
-                'day' => $date->translatedFormat('D'),
-                'label' => $date->translatedFormat('d M'),
-                'hadir' => $hadir,
-                'izin' => $izin,
-                'sakit' => $sakit,
-                'alfa' => $alfa,
-                'percentage' => $totalSiswa > 0
-                    ? round(($hadir / $totalSiswa) * 100, 2)
-                    : 0,
+                'date'       => $date->format('Y-m-d'),
+                'day'        => $date->translatedFormat('D'),
+                'label'      => $date->translatedFormat('d M'),
+                'hadir'      => $summary['hadir'],
+                'izin'       => $summary['izin'],
+                'sakit'      => $summary['sakit'],
+                'alfa'       => $summary['alfa'],
+                'percentage' => $summary['percentage'],
             ];
-        };
-
-        $weeklyAttendance = collect(range(6, 0))->map(function ($day) use ($buildDailySummary) {
-            $date = Carbon::now()->subDays($day);
-            return $buildDailySummary($date);
         });
 
         return Inertia::render('Home', [
             'stats' => [
                 'totalSiswa' => $totalSiswa,
-                'totalGuru' => Guru::count(),
+                'totalGuru'  => Guru::count(),
                 'totalKelas' => Kelas::count(),
             ],
-            'activeSemester' => $activeSemester,
+            'activeSemester'   => $activeSemester,
             'weeklyAttendance' => $weeklyAttendance,
         ]);
     }

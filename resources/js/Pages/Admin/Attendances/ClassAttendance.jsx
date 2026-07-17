@@ -13,6 +13,7 @@ export default function ClassAttendance({
     month: filters.month || "",
     year: filters.year || new Date().getFullYear(),
     status: filters.status || "",
+    tipe: filters.tipe || "",
     
 });
 
@@ -52,11 +53,52 @@ export default function ClassAttendance({
         }
     };
 
-    const statusBadge = (status) => {
-        if (status === "hadir") return "bg-green-100 text-green-700";
-        if (status === "izin") return "bg-blue-100 text-blue-700";
-        if (status === "sakit") return "bg-yellow-100 text-yellow-700";
+    const isTerlambat = (item) => {
+        if (!item?.waktu_absen) return false;
+        if (item.tipe === "pulang") return false;
+        if (String(item.status).toLowerCase() !== "hadir") return false;
+
+        const waktu = new Date(item.waktu_absen);
+        const jamMasuk = 7;
+        const menitMasuk = 15;
+
+        return (
+            waktu.getHours() > jamMasuk ||
+            (waktu.getHours() === jamMasuk && waktu.getMinutes() > menitMasuk)
+        );
+    };
+
+    const statusBadge = (item) => {
+        const itemStatus = String(item.status).toLowerCase();
+        
+        if (itemStatus === "hadir" && isTerlambat(item)) {
+            return "bg-orange-100 text-orange-700";
+        }
+        
+        if (itemStatus === "hadir") return "bg-green-100 text-green-700";
+        if (itemStatus === "izin") return "bg-blue-100 text-blue-700";
+        if (itemStatus === "sakit") return "bg-yellow-100 text-yellow-700";
         return "bg-red-100 text-red-700";
+    };
+
+    const getStatusLabel = (item) => {
+        const itemStatus = String(item.status).toLowerCase();
+        if (itemStatus === "hadir" && isTerlambat(item)) {
+            return "Hadir Terlambat";
+        }
+        return itemStatus.charAt(0).toUpperCase() + itemStatus.slice(1);
+    };
+
+    const tipeBadge = (tipe) => {
+        if (tipe === "masuk") return "bg-blue-100 text-blue-700";
+        if (tipe === "pulang") return "bg-purple-100 text-purple-700";
+        return "bg-gray-100 text-gray-500";
+    };
+
+    const tipeLabel = (tipe) => {
+        if (tipe === "masuk") return "Masuk";
+        if (tipe === "pulang") return "Pulang";
+        return "-";
     };
 
     return (
@@ -67,7 +109,7 @@ export default function ClassAttendance({
                         Absensi {classData.nama_kelas}
                     </h1>
                     <p className="text-sm text-gray-500">
-                        Semester: {" "}
+                        Semester:{" "}
     Semester:{" "}
 {activeSemester
     ? `${activeSemester.semester} - ${activeSemester.tahun_akademik}`
@@ -118,7 +160,7 @@ export default function ClassAttendance({
             <div className="mb-4 rounded-xl bg-white p-4 shadow">
                 <form
                     onSubmit={handleFilter}
-                    className="grid grid-cols-1 gap-3 md:grid-cols-4"
+                    className="grid grid-cols-1 gap-3 md:grid-cols-5"
                 >
                     <div>
                         <label className="mb-1 block text-sm font-medium">
@@ -182,6 +224,26 @@ export default function ClassAttendance({
                         </select>
                     </div>
 
+                    <div>
+                        <label className="mb-1 block text-sm font-medium">
+                            Sesi
+                        </label>
+                        <select
+                            value={filterData.tipe || ""}
+                            onChange={(e) =>
+                                setFilterData({
+                                    ...filterData,
+                                    tipe: e.target.value,
+                                })
+                            }
+                            className="w-full rounded-lg border px-3 py-2"
+                        >
+                            <option value="">Semua Sesi</option>
+                            <option value="masuk">Masuk</option>
+                            <option value="pulang">Pulang</option>
+                        </select>
+                    </div>
+
                     <div className="flex items-end">
                         <button
                             type="submit"
@@ -200,6 +262,7 @@ export default function ClassAttendance({
                             <th className="px-4 py-3 text-left">No</th>
                             <th className="px-4 py-3 text-left">Nama Siswa</th>
                             <th className="px-4 py-3 text-left">NIS</th>
+                            <th className="px-4 py-3 text-left">Sesi</th>
                             <th className="px-4 py-3 text-left">Waktu Absen</th>
                             <th className="px-4 py-3 text-left">Reader</th>
                             <th className="px-4 py-3 text-left">Bukti Foto</th>
@@ -228,6 +291,16 @@ export default function ClassAttendance({
                                     </td>
 
                                     <td className="px-4 py-3">
+                                        <span
+                                            className={`rounded-full px-3 py-1 text-xs font-semibold ${tipeBadge(
+                                                item.tipe
+                                            )}`}
+                                        >
+                                            {tipeLabel(item.tipe)}
+                                        </span>
+                                    </td>
+
+                                    <td className="px-4 py-3">
                                         {formatDateTime(item.waktu_absen)}
                                     </td>
 
@@ -252,10 +325,10 @@ export default function ClassAttendance({
                                     <td className="px-4 py-3">
                                         <span
                                             className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadge(
-                                                item.status
+                                                item
                                             )}`}
                                         >
-                                            {item.status}
+                                            {getStatusLabel(item)}
                                         </span>
                                     </td>
 
@@ -281,7 +354,7 @@ export default function ClassAttendance({
                         ) : (
                             <tr>
                                 <td
-                                    colSpan="8"
+                                    colSpan="9"
                                     className="px-4 py-6 text-center text-gray-500"
                                 >
                                     Data absensi belum tersedia.

@@ -14,11 +14,44 @@ import {
     Legend,
 } from "recharts";
 
+const statusHarianStyles = {
+    hadir: "bg-emerald-100 text-emerald-700",
+    izin: "bg-sky-100 text-sky-700",
+    sakit: "bg-amber-100 text-amber-700",
+    alfa: "bg-rose-100 text-rose-700",
+};
+
+const statusAbsenStyles = {
+    hadir: "bg-emerald-100 text-emerald-700",
+    terlambat: "bg-amber-100 text-amber-700",
+};
+
+const sesiBadgeStyles = {
+    masuk: "bg-cyan-100 text-cyan-700",
+    pulang: "bg-slate-200 text-slate-700",
+};
+
 export default function Dashboard({
     siswa,
     attendances = [],
     weeklyAttendance = [],
+    stats = {},
 }) {
+    const isTerlambat = (item) => {
+        if (!item?.waktu_absen) return false;
+        if (item.tipe === "pulang") return false;
+        if (String(item.status).toLowerCase() !== "hadir") return false;
+
+        const waktu = new Date(item.waktu_absen);
+        const jamMasuk = 7;
+        const menitMasuk = 15;
+
+        return (
+            waktu.getHours() > jamMasuk ||
+            (waktu.getHours() === jamMasuk && waktu.getMinutes() > menitMasuk)
+        );
+    };
+
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             const data = payload[0].payload;
@@ -30,11 +63,33 @@ export default function Dashboard({
                         Kehadiran: {data.percentage}%
                     </p>
 
-                    <div className="mt-2 space-y-1 text-xs text-slate-600">
-                        <p>Hadir: {data.hadir}</p>
-                        <p>Izin: {data.izin}</p>
-                        <p>Sakit: {data.sakit}</p>
-                        <p>Alpha: {data.alfa}</p>
+                    <div className="mt-2 space-y-1.5 text-xs text-slate-600">
+                        <div className="flex items-center gap-1.5">
+                            <span className="font-semibold text-slate-700">Masuk:</span>
+                            {data.masuk ? (
+                                <span className="text-emerald-600">
+                                    {data.masuk.waktu} ({data.masuk.status})
+                                </span>
+                            ) : (
+                                <span className="text-rose-500">-</span>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                            <span className="font-semibold text-slate-700">Pulang:</span>
+                            {data.pulang ? (
+                                <span className="text-emerald-600">
+                                    {data.pulang.waktu} ({data.pulang.status})
+                                </span>
+                            ) : (
+                                <span className="text-rose-500">-</span>
+                            )}
+                        </div>
+                        <div className="mt-1 flex items-center gap-1.5">
+                            <span className="font-semibold text-slate-700">Status Harian:</span>
+                            <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${statusHarianStyles[data.status_harian] || "bg-slate-100 text-slate-600"}`}>
+                                {(data.status_harian || "-").toUpperCase()}
+                            </span>
+                        </div>
                     </div>
                 </div>
             );
@@ -45,10 +100,9 @@ export default function Dashboard({
     const chartData = weeklyAttendance.map((item) => ({
         name: `${item.label}`,
         day: item.day,
-        hadir: item.hadir,
-        izin: item.izin,
-        sakit: item.sakit,
-        alfa: item.alfa,
+        masuk: item.masuk,
+        pulang: item.pulang,
+        status_harian: item.status_harian,
         percentage: item.percentage,
     }));
 
@@ -125,18 +179,39 @@ export default function Dashboard({
                             <p className="mt-1 text-2xl font-extrabold text-sky-600">
                                 {item.percentage}%
                             </p>
-                            <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                                <span className="rounded-full bg-emerald-100 px-2 py-1 text-emerald-700">
-                                    H {item.hadir}
-                                </span>
-                                <span className="rounded-full bg-sky-100 px-2 py-1 text-sky-700">
-                                    I {item.izin}
-                                </span>
-                                <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-700">
-                                    S {item.sakit}
-                                </span>
-                                <span className="rounded-full bg-rose-100 px-2 py-1 text-rose-700">
-                                    A {item.alfa}
+
+                            {/* Masuk / Pulang detail */}
+                            <div className="mt-2 space-y-1 text-xs">
+                                <div className="flex items-center gap-1.5">
+                                    <span className="font-semibold text-slate-600">Masuk:</span>
+                                    {item.masuk ? (
+                                        <span className="font-semibold text-emerald-600">
+                                         {item.masuk.waktu}
+                                        </span>
+                                    ) : (
+                                        <span className="font-semibold text-rose-500">
+                                            -
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <span className="font-semibold text-slate-600">Pulang:</span>
+                                    {item.pulang ? (
+                                        <span className="font-semibold text-emerald-600">
+                                         {item.pulang.waktu}
+                                        </span>
+                                    ) : (
+                                        <span className="font-semibold text-rose-500">
+                                            -
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Status Harian Badge */}
+                            <div className="mt-2">
+                                <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusHarianStyles[item.status_harian] || "bg-slate-100 text-slate-600"}`}>
+                                    {(item.status_harian || "-").toUpperCase()}
                                 </span>
                             </div>
                         </div>
@@ -161,6 +236,7 @@ export default function Dashboard({
                         <thead className="bg-slate-50 text-slate-600">
                             <tr>
                                 <th className="px-4 py-4 font-bold border-b border-slate-200">Tanggal & Waktu</th>
+                                <th className="px-4 py-4 font-bold border-b border-slate-200">Sesi</th>
                                 <th className="px-4 py-4 font-bold border-b border-slate-200">Status</th>
                                 <th className="px-4 py-4 font-bold border-b border-slate-200">Bukti Foto</th>
                             </tr>
@@ -171,14 +247,19 @@ export default function Dashboard({
                                     <tr key={absen.id} className="hover:bg-slate-50 transition">
                                         <td className="px-4 py-3">{formatDate(absen.waktu_absen)}</td>
                                         <td className="px-4 py-3">
+                                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${sesiBadgeStyles[absen.tipe] || "bg-slate-100 text-slate-600"}`}>
+                                                {absen.tipe ? absen.tipe.toUpperCase() : "-"}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3">
                                             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                                                absen.status === "hadir"
-                                                    ? "bg-emerald-100 text-emerald-700"
-                                                    : absen.status === "terlambat"
-                                                    ? "bg-amber-100 text-amber-700"
+                                                absen.status === "hadir" && isTerlambat(absen)
+                                                    ? statusAbsenStyles.terlambat
+                                                    : absen.status === "hadir"
+                                                    ? statusAbsenStyles.hadir
                                                     : "bg-rose-100 text-rose-700"
                                             }`}>
-                                                {absen.status.toUpperCase()}
+                                                {absen.status === "hadir" && isTerlambat(absen) ? "HADIR TERLAMBAT" : absen.status.toUpperCase()}
                                             </span>
                                         </td>
                                         <td className="px-4 py-3">
@@ -194,7 +275,7 @@ export default function Dashboard({
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="3" className="px-4 py-8 text-center text-slate-500 font-medium">
+                                    <td colSpan="4" className="px-4 py-8 text-center text-slate-500 font-medium">
                                         Belum ada riwayat absensi dalam 7 hari terakhir.
                                     </td>
                                 </tr>
@@ -206,4 +287,3 @@ export default function Dashboard({
         </SiswaLayout>
     );
 }
-
