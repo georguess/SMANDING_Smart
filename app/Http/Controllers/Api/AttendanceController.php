@@ -29,7 +29,7 @@ class AttendanceController extends Controller
         }
         $validated = $request->validate([
             'uid_card'       => ['required', 'string', 'max:100'],
-            'rfid_reader_id' => ['nullable', 'exists:rfid_readers,id'],
+            'device_id'         => ['nullable', 'string', 'exists:rfid_readers,device_id'],
             'foto'           => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:4096'],
             'image'          => ['nullable', 'string', 'max:2000000'], // Batas ~2MB
         ]);
@@ -64,14 +64,20 @@ class AttendanceController extends Controller
         }
 
         // ── Validasi RFID Reader ─────────────────────────────
-        if (!empty($validated['rfid_reader_id'])) {
-            $reader = RfidReader::find($validated['rfid_reader_id']);
+        $reader = null;
+
+        if (!empty($validated['device_id'])) {
+            $reader = RfidReader::where('device_id', $validated['device_id'])->first();
+
             if ($reader && $reader->status !== 'active') {
                 return response()->json([
                     'success' => false,
                     'message' => 'RFID Reader sedang tidak aktif.',
                 ], 422);
             }
+
+            // Catat waktu terakhir reader ini melapor (buat monitoring online/mati)
+            $reader?->update(['last_seen_at' => now()]);
         }
 
         // ── Validasi semester aktif ──────────────────────────
@@ -160,7 +166,7 @@ class AttendanceController extends Controller
             'kelas_id'       => $siswa->kelas_id,
             'semester_id'    => $activeSemester->id,
             'rfid_card_id'   => $rfidCard->id,
-            'rfid_reader_id' => $validated['rfid_reader_id'] ?? null,
+            'rfid_reader_id' => $reader?->id,
             'guru_id'        => $siswa->kelas?->guru_id,
             'waktu_absen'    => now(),
             'tanggal'        => $tanggal,

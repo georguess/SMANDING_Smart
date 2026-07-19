@@ -197,7 +197,6 @@ Route::middleware(['auth', 'role:admin'])
         Route::patch('/semesters/{semester}/set-active', [SemesterController::class, 'setActive'])
             ->name('semesters.setActive');
     });
-    });
 
 
 Route::get('/', [HomeController::class, 'index'])->name('Home');
@@ -207,7 +206,7 @@ Route::get('/', [HomeController::class, 'index'])->name('Home');
 //     return Inertia::render('testing');
 // })->name('testing');
 
-// Route::get('/dashboard', function () {
+// Route::get('/dashboard', function () {   
 //     return Inertia::render('Dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
 
