@@ -8,6 +8,9 @@ export default function ClassAttendance({
     semesters = [],
     summary = {},
     filters = {},
+    weeklyMatrix = null,
+    monthlyMatrix = null,
+    studentDetails = null,
 }) {
     const [search, setSearch] = useState(filters.search || "");
     const [status, setStatus] = useState(filters.status || "");
@@ -15,6 +18,8 @@ export default function ClassAttendance({
     const [tahun, setTahun] = useState(filters.tahun || new Date().getFullYear());
     const [semesterId, setSemesterId] = useState(filters.semester_id || "");
     const [tipe, setTipe] = useState(filters.tipe || "");
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [selectedWeekIndex, setSelectedWeekIndex] = useState(0);
 
     const attendanceData = attendances?.data ?? [];
     const attendanceLinks = attendances?.links ?? [];
@@ -41,6 +46,31 @@ export default function ClassAttendance({
 
     const resetFilter = () => {
         router.get(`/guru/attendances/classes/${kelas.id}`);
+    };
+
+    const downloadWeekCSV = () => {
+        if (!weeklyMatrix) return;
+        const week = weeklyMatrix.weeks[selectedWeekIndex];
+        const headers = ["No","Nama","NIS", ...week.map(d=>new Date(d).toLocaleDateString('id-ID'))];
+        const rows = weeklyMatrix.matrix.map((row, idx) => {
+            const cells = row.weeks[selectedWeekIndex].map(c => c ? (c === 'hadir' ? 'Hadir' : c.charAt(0).toUpperCase()+c.slice(1)) : '');
+            return [String(idx+1), row.student.nama, row.student.nis, ...cells];
+        });
+
+        let csv = '\uFEFF' + headers.join(';') + '\n';
+        rows.forEach(r => {
+            csv += r.map(v => String(v).replace(/\n/g,' ')).join(';') + '\n';
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${kelas.nama_kelas.replace(/\s+/g,'_')}_week_${selectedWeekIndex+1}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
     };
 
     const updateStatus = (attendanceId, newStatus) => {
@@ -183,17 +213,21 @@ const getStatusBadge = (item) => {
                         <h1 className="text-2xl font-black text-slate-800 sm:text-3xl">
                             Absensi Kelas {kelas.nama_kelas}
                         </h1>
-                        <p className="mt-2 text-sm text-slate-500 sm:text-base">
-                            Guru dapat melihat dan mengubah status absensi kelas wali.
-                        </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex">
                         <a
-                            href={`/guru/attendances/classes/${kelas.id}/export-csv?bulan=${bulan}&tahun=${tahun}&status=${status}&semesterId=${semesterId}&tipe=${tipe}`}
+                            href={`/guru/attendances/classes/${kelas.id}/export-matrix?bulan=${bulan}&tahun=${tahun}&status=${status}&semesterId=${semesterId}&tipe=${tipe}`}
                             className="rounded-xl bg-green-600 px-5 py-3 text-center font-semibold text-white transition hover:bg-green-700"
                         >
                             Export Excel
+                        </a>
+                        <div className="flex gap-2">
+                            <button onClick={() => router.get(`/guru/attendances/classes/${kelas.id}`, { ...filters, view: 'weekly', bulan, tahun })} className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white">Mingguan</button>
+                            <button onClick={() => router.get(`/guru/attendances/classes/${kelas.id}`, { ...filters, view: 'monthly', bulan, tahun })} className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white">Bulanan</button>
+                        </div>
+                        <a
+                            href={`/guru/attendances/classes/${kelas.id}/export-matrix?bulan=${bulan}&tahun=${tahun}&status=${status}&semesterId=${semesterId}&tipe=${tipe}`}
+                            className="rounded-xl bg-emerald-500 px-5 py-3 text-center font-semibold text-white transition hover:bg-emerald-600"
+                        >
+                            Export Rekap (Matrix)
                         </a>
                         <Link
                             href="/guru/attendances"
@@ -301,16 +335,229 @@ const getStatusBadge = (item) => {
 
                 <div className="rounded-2xl bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6">
                     <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    router.get(`/guru/attendances/classes/${kelas.id}`, { ...filters, view: 'weekly', bulan, tahun });
+                                }}
+                                className="rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white transition hover:bg-emerald-700"
+                            >
+                                Weekly Matrix
+                            </button>
                         <div>
                             <h2 className="text-lg font-black text-slate-800 sm:text-xl">
                                 Daftar Absensi
                             </h2>
+
+            {monthlyMatrix ? (
+                <div className="rounded-2xl bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6 mt-6">
+                    <div className="flex justify-end mb-3">
+                        <button onClick={() => { setPreviewOpen(true); setSelectedWeekIndex(0); }} className="rounded-lg bg-sky-600 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-700">Preview Export</button>
+                    </div>
+                    <h3 className="text-lg font-black mb-3">Rekap Bulanan</h3>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full border-collapse text-left text-sm">
+                            <thead>
+                                <tr>
+                                    <th className="p-2 sticky top-0 bg-slate-50 z-20">No</th>
+                                    <th className="p-2 sticky top-0 bg-slate-50 z-20">Nama</th>
+                                    <th className="p-2 sticky top-0 bg-slate-50 z-20">NIS</th>
+                                    {monthlyMatrix.dates.map((d, di) => (
+                                        <th key={di} className="p-2 text-center sticky top-0 bg-slate-50 z-20">{new Date(d).getDate()}</th>
+                                    ))}
+                                </tr>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    {monthlyMatrix.dates.map((d, di) => (
+                                        <th key={'dd'+di} className="p-2 text-center text-xs text-slate-500 sticky top-7 bg-white z-10">{new Date(d).toLocaleDateString('id-ID',{weekday:'short'})}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {monthlyMatrix.matrix.map((row, idx) => (
+                                    <tr key={row.student.id} className="border-b hover:bg-slate-50">
+                                        <td className="p-2 align-top">{idx+1}</td>
+                                        <td className="p-2 align-top">
+                                            <button className="text-sky-600 font-semibold" onClick={() => router.get(`/guru/attendances/classes/${kelas.id}`, { student_id: row.student.id, bulan, tahun })}>
+                                                {row.student.nama}
+                                            </button>
+                                        </td>
+                                        <td className="p-2 align-top">{row.student.nis}</td>
+                                        {row.days.map((cell, ci) => (
+                                            <td key={ci} className="p-2 align-top">
+                                                {cell ? (
+                                                    <span className={`inline-flex items-center justify-center w-6 h-6 text-[10px] font-bold rounded ${
+                                                        cell === 'hadir'
+                                                            ? 'bg-emerald-100 text-emerald-700'
+                                                            : cell === 'izin'
+                                                            ? 'bg-blue-100 text-blue-700'
+                                                            : cell === 'sakit'
+                                                            ? 'bg-amber-100 text-amber-700'
+                                                            : 'bg-red-100 text-red-700'
+                                                    }`}>
+                                                        {cell === 'hadir' ? 'H' : cell === 'izin' ? 'I' : cell === 'sakit' ? 'S' : 'A'}
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-block w-6 h-6" />
+                                                )}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ) : weeklyMatrix && (
+                <div className="rounded-2xl bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6 mt-6">
+                    <div className="flex justify-end mb-3">
+                        <button onClick={() => { setPreviewOpen(true); setSelectedWeekIndex(0); }} className="rounded-lg bg-sky-600 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-700">Preview Export</button>
+                    </div>
+                        <h3 className="text-lg font-black mb-3">Rekap Mingguan</h3>
+                        <div className="overflow-x-auto">
+                        <table className="min-w-full border-collapse text-left text-sm">
+                            <thead>
+                                <tr className="bg-slate-50">
+                                    <th className="p-2 sticky top-0 bg-slate-50 z-20">No</th>
+                                    <th className="p-2 sticky top-0 bg-slate-50 z-20">Nama</th>
+                                    <th className="p-2 sticky top-0 bg-slate-50 z-20">NIS</th>
+                                    {weeklyMatrix.weeks.map((week, wi) => (
+                                        <th key={wi} className="p-2 text-center sticky top-0 bg-slate-50 z-20">Minggu {wi + 1}</th>
+                                    ))}
+                                </tr>
+                                <tr className="bg-white">
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    {weeklyMatrix.weeks.map((week, wi) => (
+                                        <th key={'d'+wi} className="p-2 text-center text-xs text-slate-500 sticky top-7 bg-white z-10">{week.map(d=>new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short'})).join(' / ')}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {weeklyMatrix.matrix.map((row, idx) => (
+                                    <tr key={row.student.id} className="border-b hover:bg-slate-50">
+                                        <td className="p-2 align-top">{idx+1}</td>
+                                        <td className="p-2 align-top">
+                                            <button className="text-sky-600 font-semibold" onClick={() => router.get(`/guru/attendances/classes/${kelas.id}`, { student_id: row.student.id, bulan, tahun })}>
+                                                {row.student.nama}
+                                            </button>
+                                        </td>
+                                        <td className="p-2 align-top">{row.student.nis}</td>
+                                            {row.weeks.map((weekRow, wi) => (
+                                            <td key={wi} className="p-2 align-top">
+                                                <div className="grid grid-cols-5 gap-1">
+                                                    {weekRow.map((cell, di) => (
+                                                        cell ? (
+                                                            <span key={di} className={`inline-flex items-center justify-center w-6 h-6 text-[10px] font-bold rounded ${
+                                                                cell === 'hadir'
+                                                                    ? 'bg-emerald-100 text-emerald-700'
+                                                                    : cell === 'izin'
+                                                                    ? 'bg-blue-100 text-blue-700'
+                                                                    : cell === 'sakit'
+                                                                    ? 'bg-amber-100 text-amber-700'
+                                                                    : 'bg-red-100 text-red-700'
+                                                            }`}>
+                                                                {cell === 'hadir' ? 'H' : cell === 'izin' ? 'I' : cell === 'sakit' ? 'S' : 'A'}
+                                                            </span>
+                                                        ) : (
+                                                            <span key={di} className="inline-block w-6 h-6" />
+                                                        )
+                                                    ))}
+                                                </div>
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    {studentDetails && (
+                        <div className="mt-4">
+                            <h4 className="font-bold">Detail Absensi</h4>
+                            <ul className="mt-2 text-sm">
+                                {studentDetails.map(s => (
+                                    <li key={s.id}>{new Date(s.waktu_absen).toLocaleString('id-ID')} — {s.status} — {s.tipe}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {previewOpen && weeklyMatrix && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                    <div className="w-full max-w-2xl rounded bg-white p-6">
+                        <div className="flex items-center justify-between">
+                            <h4 className="font-bold">Preview Export - Pilih Minggu</h4>
+                            <button onClick={() => setPreviewOpen(false)} className="text-sm text-slate-500">Tutup</button>
+                        </div>
+
+                        <div className="mt-4 flex items-center gap-3">
+                            <label className="text-sm">Minggu:</label>
+                            <select value={selectedWeekIndex} onChange={(e) => setSelectedWeekIndex(Number(e.target.value))} className="rounded border px-2 py-1">
+                                {weeklyMatrix.weeks.map((w, i) => (
+                                    <option key={i} value={i}>Minggu {i+1} — {w.map(d=>new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short'})).join(' / ')}</option>
+                                ))}
+                            </select>
+                            <button onClick={() => downloadWeekCSV()} className="rounded bg-emerald-600 px-3 py-2 text-sm text-white">Download CSV (Client)</button>
+                            <a href={`/guru/attendances/classes/${kelas.id}/export-matrix?bulan=${bulan}&tahun=${tahun}&week=${selectedWeekIndex}`} className="rounded bg-indigo-600 px-3 py-2 text-sm text-white">Download CSV (Server)</a>
+                        </div>
+
+                        <div className="mt-4 max-h-60 overflow-auto">
+                            <table className="w-full text-sm">
+                                <thead className="bg-slate-50 text-slate-600">
+                                    <tr>
+                                        <th className="p-2">No</th>
+                                        <th className="p-2">Nama</th>
+                                        <th className="p-2">NIS</th>
+                                        {weeklyMatrix.weeks[selectedWeekIndex].map((d, i) => (
+                                            <th key={i} className="p-2 text-center text-xs">{new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short'})}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {weeklyMatrix.matrix.map((row, idx) => (
+                                        <tr key={row.student.id} className="border-b">
+                                            <td className="p-2">{idx+1}</td>
+                                            <td className="p-2">{row.student.nama}</td>
+                                            <td className="p-2">{row.student.nis}</td>
+                                            {row.weeks[selectedWeekIndex].map((cell, ci) => (
+                                                <td key={ci} className="p-2 text-center">
+                                                    {cell ? (
+                                                        <span className={`inline-flex items-center justify-center w-6 h-6 text-[10px] font-bold rounded ${
+                                                            cell === 'hadir'
+                                                                ? 'bg-emerald-100 text-emerald-700'
+                                                                : cell === 'izin'
+                                                                ? 'bg-blue-100 text-blue-700'
+                                                                : cell === 'sakit'
+                                                                ? 'bg-amber-100 text-amber-700'
+                                                                : 'bg-red-100 text-red-700'
+                                                        }`}>
+                                                            {cell === 'hadir' ? 'H' : cell === 'izin' ? 'I' : cell === 'sakit' ? 'S' : 'A'}
+                                                        </span>
+                                                    ) : (
+                                                        ''
+                                                    )}
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
                             <p className="text-sm text-slate-500">
                                 Data absensi siswa pada kelas wali.
                             </p>
                         </div>
                     </div>
 
+                    {!weeklyMatrix && (
                     <div className="space-y-3 md:hidden">
                         {attendanceData.length > 0 ? (
                             attendanceData.map((item, index) => (
@@ -376,20 +623,22 @@ const getStatusBadge = (item) => {
                             </div>
                         )}
                     </div>
+                    )}
 
+                    {!weeklyMatrix && (
                     <div className="hidden overflow-x-auto rounded-2xl border border-slate-100 md:block">
                         <table className="min-w-[980px] w-full border-collapse text-left text-sm">
                             <thead>
                                 <tr className="border-b bg-slate-50 text-slate-600">
-                                    <th className="p-3">No</th>
-                                    <th className="p-3">Nama Siswa</th>
-                                    <th className="p-3">NIS</th>
-                                    <th className="p-3">Sesi</th>
-                                    <th className="p-3">Tanggal/Waktu</th>
-                                    <th className="p-3">Status</th>
-                                    <th className="p-3">Foto</th>
-                                    <th className="p-3">Aksi</th>
-                                </tr>
+                                            <th className="p-3 sticky top-0 bg-slate-50 z-20">No</th>
+                                            <th className="p-3 sticky top-0 bg-slate-50 z-20">Nama Siswa</th>
+                                            <th className="p-3 sticky top-0 bg-slate-50 z-20">NIS</th>
+                                            <th className="p-3 sticky top-0 bg-slate-50 z-20">Sesi</th>
+                                            <th className="p-3 sticky top-0 bg-slate-50 z-20">Tanggal/Waktu</th>
+                                            <th className="p-3 sticky top-0 bg-slate-50 z-20">Status</th>
+                                            <th className="p-3 sticky top-0 bg-slate-50 z-20">Foto</th>
+                                            <th className="p-3 sticky top-0 bg-slate-50 z-20">Aksi</th>
+                                        </tr>
                             </thead>
                             <tbody>
                                 {attendanceData.length > 0 ? (
@@ -459,6 +708,7 @@ const getStatusBadge = (item) => {
                             </tbody>
                         </table>
                     </div>
+                    )}
 
                     {attendanceLinks.length > 0 && (
                         <div className="mt-5 flex flex-wrap gap-2 overflow-x-auto pb-1">

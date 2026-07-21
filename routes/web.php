@@ -116,6 +116,9 @@ Route::middleware(['auth', 'role:guru'])
         Route::get('/attendances/classes/{kelas}/export-csv', [GuruAttendanceController::class, 'exportCsv'])
             ->name('attendances.exportCsv');
 
+        Route::get('/attendances/classes/{kelas}/export-matrix', [GuruAttendanceController::class, 'exportMatrix'])
+            ->name('attendances.exportMatrix');
+
         Route::patch('/attendances/{attendance}/status', [GuruAttendanceController::class, 'updateStatus'])
             ->name('attendances.updateStatus');
 
@@ -155,6 +158,9 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::get('/attendances/classes/{kelas}', [AttendanceController::class, 'classAttendance'])
             ->name('attendances.classes');
+
+        Route::get('/attendances/classes/{kelas}/export-matrix', [AttendanceController::class, 'exportMatrix'])
+            ->name('attendances.exportMatrix');
 
         Route::patch('/attendances/{attendance}/status', [AttendanceController::class, 'updateStatus'])
             ->name('attendances.updateStatus');

@@ -8,6 +8,8 @@ export default function ClassAttendance({
     attendances,
     statusCounts,
     filters,
+    weeklyMatrix = null,
+    studentDetails = null,
 }) {
     const [filterData, setFilterData] = useState({
     month: filters.month || "",
@@ -43,6 +45,34 @@ export default function ClassAttendance({
                 replace: true,
             }
         );
+    };
+
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [selectedWeekIndex, setSelectedWeekIndex] = useState(0);
+
+    const downloadWeekCSV = () => {
+        if (!weeklyMatrix) return;
+        const week = weeklyMatrix.weeks[selectedWeekIndex];
+        const headers = ["No","Nama","NIS", ...week.map(d=>new Date(d).toLocaleDateString('id-ID'))];
+        const rows = weeklyMatrix.matrix.map((row, idx) => {
+            const cells = row.weeks[selectedWeekIndex].map(c => c ? (c === 'hadir' ? 'Hadir' : c.charAt(0).toUpperCase()+c.slice(1)) : '');
+            return [String(idx+1), row.student.nama, row.student.nis, ...cells];
+        });
+
+        let csv = '\uFEFF' + headers.join(';') + '\n';
+        rows.forEach(r => {
+            csv += r.map(v => String(v).replace(/\n/g,' ')).join(';') + '\n';
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${classData.nama_kelas.replace(/\s+/g,'_')}_week_${selectedWeekIndex+1}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
     };
 
     const updateStatus = (attendanceId, status) => {
@@ -117,6 +147,28 @@ export default function ClassAttendance({
                         {classData.wali_kelas?.nama || "-"} | Jumlah Siswa:{" "}
                         {classData.siswas_count}
                     </p>
+                </div>
+
+                <div className="flex gap-2">
+                    <a
+                        href={`/admin/attendances/classes/${classData.id}/export-matrix?month=${filterData.month || ''}&year=${filterData.year || ''}&status=${filterData.status || ''}&tipe=${filterData.tipe || ''}`}
+                        className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+                    >
+                        Export Rekap (Matrix)
+                    </a>
+                    <button
+                        onClick={() => router.get(`/admin/attendances/classes/${classData.id}`, { ...filterData, view: 'weekly' })}
+                        className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                    >
+                        Weekly Matrix
+                    </button>
+                    <button
+                        onClick={() => router.get(`/admin/attendances/classes/${classData.id}`, { ...filterData, view: 'monthly' })}
+                        className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+                    >
+                        Monthly Matrix
+                    </button>
+                    <button onClick={() => { setPreviewOpen(true); setSelectedWeekIndex(0); }} className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700">Preview Export</button>
                 </div>
 
                 <Link
@@ -255,6 +307,206 @@ export default function ClassAttendance({
                 </form>
             </div>
 
+            {monthlyMatrix ? (
+                <div className="mb-4 rounded-xl bg-white p-4 shadow">
+                    <h3 className="text-lg font-bold mb-3">Rekap Bulanan</h3>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead className="bg-[#f8fafc] text-slate-600">
+                                <tr>
+                                    <th className="px-4 py-2 sticky top-0 bg-[#f8fafc] z-20">No</th>
+                                    <th className="px-4 py-2 sticky top-0 bg-[#f8fafc] z-20">Nama</th>
+                                    <th className="px-4 py-2 sticky top-0 bg-[#f8fafc] z-20">NIS</th>
+                                    {monthlyMatrix.dates.map((d, i) => (
+                                        <th key={i} className="px-4 py-2 text-center sticky top-0 bg-[#f8fafc] z-20">{new Date(d).getDate()}</th>
+                                    ))}
+                                </tr>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    {monthlyMatrix.dates.map((d, i) => (
+                                        <th key={'dd'+i} className="px-4 py-1 text-xs text-slate-500 sticky top-10 bg-white z-10">{new Date(d).toLocaleDateString('id-ID',{weekday:'short'})}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {monthlyMatrix.matrix.map((row, idx) => (
+                                    <tr key={row.student.id} className="border-b hover:bg-gray-50">
+                                        <td className="px-4 py-2">{idx+1}</td>
+                                        <td className="px-4 py-2 font-medium text-slate-800">
+                                            <button className="text-sky-600" onClick={() => router.get(`/admin/attendances/classes/${classData.id}`, { student_id: row.student.id, month: filterData.month, year: filterData.year })}>
+                                                {row.student.nama}
+                                            </button>
+                                        </td>
+                                        <td className="px-4 py-2">{row.student.nis}</td>
+                                        {row.days.map((cell, di) => (
+                                            <td key={di} className="px-4 py-2 text-center">
+                                                {cell ? (
+                                                    <span className={`inline-flex items-center justify-center w-6 h-6 text-[10px] font-bold rounded ${
+                                                        cell === 'hadir'
+                                                            ? 'bg-emerald-100 text-emerald-700'
+                                                            : cell === 'izin'
+                                                            ? 'bg-blue-100 text-blue-700'
+                                                            : cell === 'sakit'
+                                                            ? 'bg-amber-100 text-amber-700'
+                                                            : 'bg-red-100 text-red-700'
+                                                    }`}>
+                                                        {cell === 'hadir' ? 'H' : cell === 'izin' ? 'I' : cell === 'sakit' ? 'S' : 'A'}
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-block w-6 h-6" />
+                                                )}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ) : weeklyMatrix && (
+                <div className="mb-4 rounded-xl bg-white p-4 shadow">
+                    <h3 className="text-lg font-bold mb-3">Rekap Mingguan</h3>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead className="bg-[#f8fafc] text-slate-600">
+                                <tr>
+                                    <th className="px-4 py-2 sticky top-0 bg-[#f8fafc] z-20">No</th>
+                                    <th className="px-4 py-2 sticky top-0 bg-[#f8fafc] z-20">Nama</th>
+                                    <th className="px-4 py-2 sticky top-0 bg-[#f8fafc] z-20">NIS</th>
+                                    {weeklyMatrix.weeks.map((w, i) => (
+                                        <th key={i} className="px-4 py-2 text-center sticky top-0 bg-[#f8fafc] z-20">Minggu {i+1}</th>
+                                    ))}
+                                </tr>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    {weeklyMatrix.weeks.map((w, i) => (
+                                        <th key={'d'+i} className="px-4 py-1 text-xs text-slate-500 sticky top-10 bg-white z-10">{w.map(d=>new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short'})).join(' / ')}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {weeklyMatrix.matrix.map((row, idx) => (
+                                    <tr key={row.student.id} className="border-b hover:bg-gray-50">
+                                        <td className="px-4 py-2">{idx+1}</td>
+                                        <td className="px-4 py-2 font-medium text-slate-800">
+                                            <button className="text-sky-600" onClick={() => router.get(`/admin/attendances/classes/${classData.id}`, { student_id: row.student.id, month: filterData.month, year: filterData.year })}>
+                                                {row.student.nama}
+                                            </button>
+                                        </td>
+                                        <td className="px-4 py-2">{row.student.nis}</td>
+                                        {row.weeks.map((weekRow, wi) => (
+                                            <td key={wi} className="px-4 py-2">
+                                                <div className="grid grid-cols-5 gap-1">
+                                                    {weekRow.map((cell, di) => (
+                                                        <td key={di} className="inline-block">
+                                                            {cell ? (
+                                                                <span className={`inline-flex items-center justify-center w-6 h-6 text-[10px] font-bold rounded ${
+                                                                    cell === 'hadir'
+                                                                        ? 'bg-emerald-100 text-emerald-700'
+                                                                        : cell === 'izin'
+                                                                        ? 'bg-blue-100 text-blue-700'
+                                                                        : cell === 'sakit'
+                                                                        ? 'bg-amber-100 text-amber-700'
+                                                                        : 'bg-red-100 text-red-700'
+                                                                }`}>
+                                                                    {cell === 'hadir' ? 'H' : cell === 'izin' ? 'I' : cell === 'sakit' ? 'S' : 'A'}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="inline-block w-6 h-6" />
+                                                            )}
+                                                        </td>
+                                                    ))}
+                                                </div>
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    {studentDetails && (
+                        <div className="mt-4">
+                            <h4 className="font-bold">Detail Absensi</h4>
+                            <ul className="mt-2 text-sm">
+                                {studentDetails.map(s => (
+                                    <li key={s.id}>{new Date(s.waktu_absen).toLocaleDateString('id-ID')} — {s.status} — {s.tipe}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {previewOpen && weeklyMatrix && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                    <div className="w-full max-w-3xl rounded bg-white p-6">
+                        <div className="flex items-center justify-between">
+                            <h4 className="font-bold">Preview Export - Pilih Minggu</h4>
+                            <button onClick={() => setPreviewOpen(false)} className="text-sm text-slate-500">Tutup</button>
+                        </div>
+
+                        <div className="mt-4 flex items-center gap-3">
+                            <label className="text-sm">Minggu:</label>
+                            <select value={selectedWeekIndex} onChange={(e) => setSelectedWeekIndex(Number(e.target.value))} className="rounded border px-2 py-1">
+                                {weeklyMatrix.weeks.map((w, i) => (
+                                    <option key={i} value={i}>Minggu {i+1} — {w.map(d=>new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short'})).join(' / ')}</option>
+                                ))}
+                            </select>
+                            <button onClick={() => downloadWeekCSV()} className="rounded bg-emerald-600 px-3 py-2 text-sm text-white">Download CSV (Client)</button>
+                            <a href={`/admin/attendances/classes/${classData.id}/export-matrix?month=${filterData.month || ''}&year=${filterData.year || ''}&week=${selectedWeekIndex}`} className="rounded bg-indigo-600 px-3 py-2 text-sm text-white">Download CSV (Server)</a>
+                        </div>
+
+                        <div className="mt-4 max-h-60 overflow-auto">
+                            <table className="w-full text-sm">
+                                <thead className="bg-slate-50 text-slate-600">
+                                    <tr>
+                                        <th className="px-4 py-2">No</th>
+                                        <th className="px-4 py-2">Nama</th>
+                                        <th className="px-4 py-2">NIS</th>
+                                        {weeklyMatrix.weeks[selectedWeekIndex].map((d, i) => (
+                                            <th key={i} className="px-4 py-1 text-xs text-slate-500">{new Date(d).toLocaleDateString('id-ID',{day:'2-digit',month:'short'})}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {weeklyMatrix.matrix.map((row, idx) => (
+                                        <tr key={row.student.id} className="border-b">
+                                            <td className="px-4 py-2">{idx+1}</td>
+                                            <td className="px-4 py-2">{row.student.nama}</td>
+                                            <td className="px-4 py-2">{row.student.nis}</td>
+                                            {row.weeks[selectedWeekIndex].map((cell, ci) => (
+                                                <td key={ci} className="px-4 py-2 text-center">
+                                                    {cell ? (
+                                                        <span className={`inline-flex items-center justify-center w-6 h-6 text-[10px] font-bold rounded ${
+                                                            cell === 'hadir'
+                                                                ? 'bg-emerald-100 text-emerald-700'
+                                                                : cell === 'izin'
+                                                                ? 'bg-blue-100 text-blue-700'
+                                                                : cell === 'sakit'
+                                                                ? 'bg-amber-100 text-amber-700'
+                                                                : 'bg-red-100 text-red-700'
+                                                        }`}>
+                                                            {cell === 'hadir' ? 'H' : cell === 'izin' ? 'I' : cell === 'sakit' ? 'S' : 'A'}
+                                                        </span>
+                                                    ) : (
+                                                        ''
+                                                    )}
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {!weeklyMatrix && (
             <div className="overflow-x-auto rounded-xl bg-white shadow">
                 <table className="w-full text-sm">
                     <thead className="bg-[#2C2C2C] text-white">
@@ -364,6 +616,7 @@ export default function ClassAttendance({
                     </tbody>
                 </table>
             </div>
+            )}
 
             <div className="mt-4 flex flex-wrap gap-2">
                 {attendances.links.map((link, index) => (
