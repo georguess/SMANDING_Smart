@@ -11,13 +11,13 @@ export default defineConfig({
         react(),
     ],
     server: {
-        host: '0.0.0.0',
+        host: '127.0.0.1',
         port: 5173,
         strictPort: true,
         cors: true,
-        origin: 'http://192.168.1.2:5173',
+        origin: 'http://127.0.0.1:5173',
         hmr: {
-            host: '192.168.1.3',
+            host: '127.0.0.1',
             protocol: 'ws',
         }
     }
